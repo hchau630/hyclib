@@ -49,39 +49,47 @@ class Configurable:
     # define __init__ with super() call to make this class suitable for multiple inheritance
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__parameters = set()
-        self.__configurables = set()
+        self.__parameters = {}
+        self.__configurables = {}
         
-#     def __getattribute__(self, name):
-#         value = super().__getattribute__(name)
-#         if isinstance(value, Parameter):
-#             return value.data
-#         return value
+    def __getattribute__(self, name):
+        value = super().__getattribute__(name)
+        if isinstance(value, Parameter):
+            return value.data
+        return value
     
     def __setattr__(self, name, value):
         super().__setattr__(name, value)
         if isinstance(value, Parameter):
-            self.__parameters.add(name)
+            if hasattr(self, '_Configurable__parameters'):
+                self.__parameters[name] = value
+            else:
+                raise RuntimeError("Configurable must be initalized before setting Parameter")
         elif isinstance(value, Configurable):
-            self.__configurables.add(name)
+            if hasattr(self, '_Configurable__configurables'):
+                self.__configurables[name] = value
+            else:
+                raise RuntimeError("Configurable must be initalized before setting Configurable")
+        else:
+            if hasattr(self, '_Configurable__parameters') and name in self.__parameters:
+                del self.__parameters[name]
+            elif hasattr(self, '_Configurable__configurables') and name in self.__configurables:
+                del self.__configurables[name]
     
     def __delattr__(self, name):
-        value = getattr(self, name)
-        if isinstance(value, Parameter):
-            self.__parameters.remove(name)
-        elif isinstance(value, Configurable):
-            self.__configurables.remove(name)
+        if hasattr(self, '_Configurable__parameters') and name in self.__parameters:
+            del self.__parameters[name]
+        elif hasattr(self, '_Configurable__configurables') and name in self.__configurables:
+            del self.__configurables[name]
         super().__delattr__(name)
     
     @property
     def params_dict(self):
-        result = {name: getattr(self, name) for name in self.__parameters}
-        return dict(sorted(result.items()))
+        return self.__parameters
     
     @property
     def configurables_dict(self):
-        result = {name: getattr(self, name) for name in self.__configurables}
-        return dict(sorted(result.items()))
+        return self.__configurables
     
     def config_dict(self):
         """
