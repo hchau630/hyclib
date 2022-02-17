@@ -3,6 +3,12 @@ class PathNotFound(IOError):
 
 class PathAlreadyExists(IOError):
      pass
-    
-class ConfigurationError(Exception):
+
+class ConfigurableError(Exception):
+    pass
+
+class InvalidConfigParameter(ConfigurableError):
+    pass
+
+class ConfigDictError(ConfigurableError):
     pass

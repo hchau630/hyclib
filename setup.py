@@ -6,6 +6,6 @@ setup(
     packages=find_packages(),
     extras_require={
         'packaging': ['twine'],
-        'test': ['pytest'],
+        'test': ['pytest','torch','numpy'],
     }
 )
