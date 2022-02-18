@@ -5,12 +5,16 @@ import json
 
 import utils
 
-def save(path, data, extension, depth=-1, overwrite=False):
+def save(path, data, extension=None, depth=-1, overwrite=False):
     """
     Saves data at path.
-    If path has a suffix, this must match the extension, and the data 
+    If path has a suffix and extension is provided, then 
+    the suffix must match the extension, and the data 
     is stored as a single file with the specified extension at path.
-    The depth parameter is ignored in this case.
+    If path has a suffix and no extension is provided, then
+    the extension is inferred and the data is also stored
+    as a single file.
+    The depth parameter is ignored in both these case.
     If path does not have suffix, then path is the directory in which
     the data is stored. The data must be a dictionary.
     The depth parameter controls the depth of the directory.
@@ -18,6 +22,9 @@ def save(path, data, extension, depth=-1, overwrite=False):
     if depth=-1, then path will be a directory as deep as the data dictionary.
     """
     path = pathlib.Path(path)
+    
+    if extension is None:
+        extension = path.suffix[1:]
     
     if extension == 'pkl':
         def save_func(filename, dat):
@@ -53,10 +60,13 @@ def save_data(path, data_dict, **kwargs):
 def save_config(path, config, **kwargs):
     save(path, config, 'json', **kwargs)
     
-def load(path, extension):
+def load(path, extension=None):
     path = pathlib.Path(path)
     if not path.exists():
         raise utils.exceptions.PathNotFound(f"The path {path} does not exist.")
+        
+    if extension is None:
+        extension = path.suffix[1:]
         
     if extension == 'pkl':
         def load_func(filename):
@@ -81,7 +91,7 @@ def load(path, extension):
                         cur_path_rel = pathlib.Path(cur_path).relative_to(path)
                         utils.itertools.assign_dict(data, [*cur_path_rel.parts,filename.stem], load_func(os.path.join(cur_path,filename)))
     else:
-        raise IOError("Path {path} is neither file nor directory")
+        raise IOError(f"Path {path} is neither file nor directory")
         
     return data
         

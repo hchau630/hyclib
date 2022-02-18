@@ -4,7 +4,7 @@ import copy
 from utils import exceptions
 
 class Parameter:
-    def __init__(self, data=None, dtype=None, is_jsonable=True, deepcopy=False):
+    def __init__(self, data=None, dtype=None, is_jsonable=True, deepcopy=False, load_callback=None):
         if dtype is not None:
             self.dtype = dtype
             
@@ -28,12 +28,18 @@ class Parameter:
                                                         " If not possible, you can set is_jsonable=False,"
                                                         " but then you can't save the config dict as json.") from None
         self.deepcopy = deepcopy
-        self.load(data)
+        self.load_callback = load_callback
+        self.set_data(data)
         
-    def load(self, data):
+    def set_data(self, data):
         if self.deepcopy:
             data = copy.deepcopy(data)
         self._data = self.dtype(data)  # shallow copy
+        
+    def load(self, data):
+        self.set_data(data)
+        if self.load_callback is not None:
+            self.load_callback(self)
         
     @property
     def data(self):
@@ -133,7 +139,10 @@ class Configurable:
         load(self)
         
         if strict:
-            assert len(missing_keys) == 0 and len(unexpected_keys) == 0
+            if not (len(missing_keys) == 0 and len(unexpected_keys) == 0):
+                print(missing_keys)
+                print(unexpected_keys)
+                raise AssertionError("strict=True, but there is mismatch when loading config dict.")
         
 # class Configurable:
 #     # define __init__ with super() call to make this class suitable for multiple inheritance
