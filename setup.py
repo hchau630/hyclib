@@ -4,8 +4,10 @@ setup(
     name='hyc-utils',
     version='0.2.0',
     packages=find_packages(),
+    install_requires=[
+        'matplotlib',
+    ],
     extras_require={
-        'packaging': ['twine'],
-        'test': ['pytest','torch','numpy'],
+        'dev': ['pytest','torch','numpy','twine'],
     }
 )
