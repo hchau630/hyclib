@@ -48,7 +48,7 @@ def save(path, data, extension=None, depth=-1, overwrite=False):
         
     else: # path is a directory
         for key, val in utils.itertools.flatten_dict(data, depth=depth).items():
-            filename = path / f"{'/'.join(key)}.{extension}"
+            filename = path / f"{'/'.join(key.split('.'))}.{extension}"
             filename.parent.mkdir(parents=True, exist_ok=True)
             if not overwrite and filename.is_file():
                 raise utils.exceptions.PathAlreadyExists(f"The file {str(filename)} already exists.")

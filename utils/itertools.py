@@ -37,20 +37,23 @@ def flatten_dict(d, depth=-1):
     
     >>> d = {'a': {'b': {'c': 'd'}}}
     >>> flatten_dict(d, depth=1)
-    {('a','b'): {'c': 'd'}}
+    {'a.b': {'c': 'd'}}
     >>> flatten_dict(d, depth=-1)
-    {('a','b','c'):'d'}
+    {'a.b.c':'d'}
     
     """
     if not isinstance(d, dict):
         raise TypeError(f"The arugment to flatten_dict must be a dict, not {type(d)}")
     flattened_dict = {}
     for k, v in d.items():
+        if '.' in k:
+            raise ValueError("dictionary should not contain '.' in any of its keys")
         if depth == 0 or not isinstance(v, dict) or v == {}: # if depth == 0 or v is leaf
             flattened_dict[k] = v
         else:
             for new_k, new_v in flatten_dict(v, depth=depth-1).items():
-                flattened_dict[(k, *new_k)] = new_v
+                flattened_dict['.'.join([k, new_k])] = new_v
+    print(flattened_dict)
     return flattened_dict
 
 def assign_dict(d, keys, value):
