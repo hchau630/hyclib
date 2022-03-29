@@ -53,7 +53,6 @@ def flatten_dict(d, depth=-1):
         else:
             for new_k, new_v in flatten_dict(v, depth=depth-1).items():
                 flattened_dict['.'.join([k, new_k])] = new_v
-    print(flattened_dict)
     return flattened_dict
 
 def assign_dict(d, keys, value):
