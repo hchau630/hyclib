@@ -1,4 +1,5 @@
 numpy
-torch==1.10.1+cpu
+torch
 matplotlib
--f https://download.pytorch.org/whl/cpu/torch_stable.html
+tomli
+--extra-index-url https://download.pytorch.org/whl/cpu

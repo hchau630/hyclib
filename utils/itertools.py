@@ -1,3 +1,7 @@
+import itertools
+
+import numpy as np
+
 def flatten_seq(s, depth=-1, dtypes=[list, tuple]):
     """
     Recursively flattens a sequence (defined as an instance
@@ -69,3 +73,51 @@ def assign_dict(d, keys, value):
     for key in keys[:-1]:
         d = d.setdefault(key, {})
     d[keys[-1]] = value
+    
+def product(*ls, enum=False):
+    """
+    Like itertools.product, but has an enum keyword that
+    returns the nd-index along with the elements. Note, however, it
+    assumes that the inputs are sequences, not iterables, since len() is used.
+    """
+    if not enum:
+        return itertools.product(*ls)
+    return zip(np.ndindex(tuple(len(l) for l in ls)), itertools.product(*ls))
+    
+def dict_zip(*dicts, mode='strict', **kwargs):
+    if mode == 'strict':
+        return _dict_zip_strict(*dicts, **kwargs)
+    if mode == 'intersect':
+        return _dict_zip_intersection(*dicts, **kwargs)
+    if mode == 'union':
+        return _dict_zip_union(*dicts, **kwargs)
+    raise NotImplementedError("mode must be either 'strict', 'intersect', or 'union'")
+            
+def _dict_zip_strict(*dicts):
+    if not dicts:
+        return
+
+    n = len(dicts[0])
+    if any(len(d) != n for d in dicts):
+        raise ValueError('arguments must have the same length')
+
+    for key, first_val in dicts[0].items():
+        yield key, first_val, *(other[key] for other in dicts[1:])
+
+
+def _dict_zip_intersection(*dicts):
+    if not dicts:
+        return
+
+    keys = set(dicts[0]).intersection(*dicts[1:])
+    for key in keys:
+        yield key, *(d[key] for d in dicts)
+
+
+def _dict_zip_union(*dicts, fillvalue=None):
+    if not dicts:
+        return
+
+    keys = set(dicts[0]).union(*dicts[1:])
+    for key in keys:
+        yield key, *(d.get(key, fillvalue) for d in dicts)
