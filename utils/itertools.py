@@ -59,6 +59,23 @@ def flatten_dict(d, depth=-1):
                 flattened_dict['.'.join([k, new_k])] = new_v
     return flattened_dict
 
+def dict_iter(d, delimiter='.'):
+    assert isinstance(d, dict)
+    
+    for k, v in d.items():
+        if isinstance(v, dict):
+            for ki, vi in dict_iter(v):
+                yield (delimiter.join([k, ki]), vi)
+        
+        else:
+            yield (k, v)
+            
+def dict_get(d, k, delimiter='.'):
+    v = d
+    for ki in k.split(delimiter):
+        v = v[ki]
+    return v
+
 def assign_dict(d, keys, value):
     """
     Assign (potentially nested) value to dictionary using a list/tuple of keys

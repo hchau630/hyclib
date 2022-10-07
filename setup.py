@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='hyc-utils',
-    version='0.4.7',
+    version='0.5.1',
     packages=find_packages(),
     install_requires=[
         'numpy',
@@ -11,6 +11,6 @@ setup(
         'tomli',
     ],
     extras_require={
-        'dev': ['pytest','twine'],
+        'dev': ['pandas','scipy','pytest','twine'],
     }
 )
