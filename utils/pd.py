@@ -12,6 +12,19 @@ def _formatter(x, float_format=None, verbose=False):
         if verbose:
             return f"torch.Tensor {tuple(x.shape)} ({x.dtype})"
         return f"{tuple(x.shape)}"
+    if isinstance(x, tuple):
+        if verbose:
+            return f"tuple ({len(x)}) {tuple([type(e).__name__ for e in x])}"
+        return f"tuple ({len(x)})"
+    if isinstance(x, list):
+        if verbose:
+            return f"list ({len(x)}) {[type(e).__name__ for e in x]}"
+        return f"list ({len(x)})"
+    if isinstance(x, dict):
+        if verbose:
+            d = {k: type(v).__name__ for k, v in x.items()}
+            return f"dict ({len(x)}) {d}"
+        return f"dict ({len(x)})"
     if isinstance(x, np.floating):
         if float_format is None:
             return f'{x:.4f}'
