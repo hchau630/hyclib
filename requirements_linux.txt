@@ -1,0 +1,16 @@
+# package requirements
+numpy
+torch
+matplotlib
+tomli
+statsmodels
+
+# development requirements
+ipykernel
+pandas
+scipy
+seaborn
+pytest
+twine
+
+--extra-index-url https://download.pytorch.org/whl/cpu
