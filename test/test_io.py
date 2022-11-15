@@ -1,5 +1,6 @@
-import utils
 import pathlib
+
+import utils
 
 def test_save_load(tmp_path):
     A = {'abc': 'bcd', 'abcde': {'cde': 'def'}}

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='hyc-utils',
-    version='0.5.4',
+    version='0.5.5',
     packages=find_packages(),
     install_requires=[
         'numpy',
@@ -11,4 +11,7 @@ setup(
         'torch',
         'tomli',
     ],
+    extras_require={
+        'test': ['pytest', 'scipy'],
+    },
 )

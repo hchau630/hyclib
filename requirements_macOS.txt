@@ -1,14 +1,9 @@
-# package requirements
-numpy
-torch
-matplotlib
-# tomli
-statsmodels
+# notebook requirements
+pandas
+seaborn
 
 # development requirements
-ipykernel
-pandas
-scipy
-seaborn
-pytest
+nbdime # for git merging notebooks
 twine
+
+-e .[test]
