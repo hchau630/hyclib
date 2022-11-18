@@ -109,3 +109,64 @@ def regplot(x, y, yerr=None, scatter_kwargs=None, ci_kwargs=None, text_kwargs=No
     ))
     
     return artists
+
+def vec(vec, origin=None, ax=None, pad=0.05, **kwargs):
+    assert len(vec) == 2
+    
+    default_kwargs = {
+        'angles': 'xy',
+        'scale_units': 'xy',
+        'scale': 1
+    }
+    default_kwargs.update(kwargs)
+    
+    if ax is None:
+        ax = plt.gca()
+        
+    if origin is None:
+        origin = [0,0]
+        
+    arrow = ax.quiver(*origin, *vec, **default_kwargs)
+    
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+    
+    xmin = min(origin[0], origin[0]+vec[0])
+    xmax = max(origin[0], origin[0]+vec[0])
+    xrange = xmax - xmin
+    xmin = min(xlim[0], xmin-pad*xrange)
+    xmax = max(xlim[1], xmax+pad*xrange)
+    
+    ymin = min(origin[1], origin[1]+vec[1])
+    ymax = max(origin[1], origin[1]+vec[1])
+    yrange = ymax - ymin
+    ymin = min(ylim[0], ymin-pad*yrange)
+    ymax = max(ylim[1], ymax+pad*yrange)
+    
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    
+    return arrow
+
+def set_aspect(option, ax=None):
+    if ax is None:
+        ax = plt.gca()
+    
+    if option == 'equal_square':
+        ax.set_aspect('equal')
+        xlim, ylim = ax.get_xlim(), ax.get_ylim()
+        xrange = xlim[1] - xlim[0]
+        yrange = ylim[1] - ylim[0]
+        
+        if xrange < yrange:
+            ratio = yrange / xrange
+            xcenter = 0.5*(xlim[0] + xlim[1])
+            xlim = ((xlim[0]-xcenter)*ratio+xcenter, (xlim[1]-xcenter)*ratio+xcenter)
+        else:
+            ratio = xrange / yrange
+            ycenter = 0.5*(ylim[0] + ylim[1])
+            ylim = ((ylim[0]-ycenter)*ratio+ycenter, (ylim[1]-ycenter)*ratio+ycenter)
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        
+    else:
+        ax.set_aspect(option)
