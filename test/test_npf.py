@@ -19,6 +19,13 @@ def check_npf_array(arr, expected_func_arr):
     assert np.allclose(res.reshape(-1), np.array([[func(x) for func in expected_func_arr.reshape(-1)] for x in xs]).reshape(-1))
     xs = xs.reshape(2,7)
     assert arr(xs).shape == (*xs.shape, *expected_shape)
+    
+def test_shape():
+    f1, f2 = lambda x: 2*x, lambda x: 3*x
+    a = utils.npf.array([[f1, f2]])
+    x = np.ones((3,4))
+    assert a(x).shape == (3,4,1,2)
+    assert a(x, batch='trailing').shape == (1,2,3,4)
 
 def test():
     f1, f2 = lambda x: 2*x, lambda x: 3*x
@@ -106,6 +113,10 @@ def test():
     b = utils.npf.array([g1, g2])
     check_npf_array(a+b, [[lambda x: a[0,0](x)+g1(x), lambda x: a[0,1](x)+g2(x)]]) # npf_poly + npf_func
     check_npf_array(b+a, [[lambda x: a[0,0](x)+g1(x), lambda x: a[0,1](x)+g2(x)]]) # npf_func + npf_poly
+    
+    # b = Polynomial([1,2])
+    # check_npf_array(a+b, [[lambda x: a[0,0](x)+b(x), lambda x: a[0,1](x)+b(x)]]) # npf_poly + poly
+    # check_npf_array(b+a, [[lambda x: a[0,0](x)+b(x), lambda x: a[0,1](x)+b(x)]]) # poly + npf_poly
     
     b = utils.npf.array([np.pi, 2*np.pi])
     check_npf_array(a+b, [[a[0,0]+b[0], a[0,1]+b[1]]]) # npf_poly + npf_scalar

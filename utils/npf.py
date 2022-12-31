@@ -8,7 +8,7 @@ class ndarray(np.ndarray):
         if obj is None: return
         self.op_expr = getattr(obj, 'op_expr', '{}')
     
-    def __call__(self, x):
+    def __call__(self, x, batch='leading'):
         if isinstance(x, numbers.Number):
             x_shape = tuple()
             x = np.array([x])
@@ -25,7 +25,13 @@ class ndarray(np.ndarray):
             else:
                 res.append(self[idx](x))
                 
-        res = np.moveaxis(np.array(res), -1, 0).reshape((*x_shape, *self.shape))
+        if batch == 'leading':
+            res = np.moveaxis(np.array(res), -1, 0).reshape((*x_shape, *self.shape))
+        elif batch == 'trailing':
+            res = np.array(res).reshape((*self.shape, *x_shape))
+        else:
+            raise ValueError(f"batch argument must be 'leading' or 'trailing', but '{batch}' provided.")
+            
         return res
     
     def __matmul__(self, g):
@@ -177,7 +183,10 @@ def get_array_op(op_name):
     ufunc = get_ufunc(op_name)
     
     def array_op(self, g):
-        result = ufunc(self, g)
+        try:
+            result = ufunc(self, g)
+        except TypeError:
+            return NotImplemented
         
         if np.any(result == NotImplemented):
             return NotImplemented
