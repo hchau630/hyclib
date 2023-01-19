@@ -64,7 +64,7 @@ def dict_iter(d, delimiter='.'):
     
     for k, v in d.items():
         if isinstance(v, dict):
-            for ki, vi in dict_iter(v):
+            for ki, vi in dict_iter(v, delimiter=delimiter):
                 yield (delimiter.join([k, ki]), vi)
         
         else:
