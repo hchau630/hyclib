@@ -3,7 +3,7 @@ def pformat(d, indent=0, spaces=4, verbose=False):
     for key, value in d.items():
         output += f"{' ' * spaces * indent}'{str(key)}':\n"
         if isinstance(value, dict):
-            output += f"{pformat(value, indent+1)}\n"
+            output += f"{pformat(value, indent=indent+1, spaces=spaces, verbose=verbose)}\n"
         else:
             if not verbose:
                 value = type(value)
