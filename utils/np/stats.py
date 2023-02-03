@@ -19,6 +19,8 @@ __all__ = [
     'nancorrcoef',
     'meanerr',
     'nanmeanerr',
+    'weightedmeanerr',
+    'nanweightedmeanerr',
 ]
 
 mean = np.mean
@@ -86,3 +88,38 @@ def nanmeanerr(y, yerr, axis=None):
     yerr = np.nansum(yerr**2, axis=axis)**0.5/nancount(yerr, axis=axis)
         
     return y, yerr
+
+def weightedmeanerr(y, yerr, axis=None):
+    """
+    Weighted mean and error of weighted mean
+    
+    Reference:
+    Bevington and Robinson - Data Reduction and Error Analysis
+    """
+    assert y.shape == yerr.shape
+    
+    y = np.sum(y/yerr**2, axis=axis) / np.sum(1/yerr**2, axis=axis) # eq. 4.17 in reference
+    yerr = 1/np.sum(1/yerr**2, axis=axis)**0.5 # eq 4.19 with square root
+    
+    return y, yerr
+    
+def nanweightedmeanerr(y, yerr, axis=None):
+    """
+    Weighted mean and error of weighted mean with np.nan values (either in mean or in error) ignored in the calculations.
+    
+    Reference:
+    Bevington and Robinson - Data Reduction and Error Analysis
+    """
+    
+    assert y.shape == yerr.shape
+    
+    nans = np.isnan(y) | np.isnan(yerr)
+    y, yerr = y.copy(), yerr.copy()
+    y[nans] = np.nan
+    yerr[nans] = np.nan
+    
+    y = np.nansum(y/yerr**2, axis=axis) / np.nansum(1/yerr**2, axis=axis) # eq. 4.17 in reference
+    yerr = 1/np.nansum(1/yerr**2, axis=axis)**0.5 # eq 4.19 with square root
+    
+    return y, yerr
+    

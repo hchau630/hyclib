@@ -1,7 +1,10 @@
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 import statsmodels.api as sm
 import numpy as np
+
+import utils
 
 def subplots(rows, cols, plot_size=(6.4,4.8), keep_shape=False, **kwargs):
     fig, axes = plt.subplots(rows, cols, figsize=(plot_size[0]*cols, plot_size[1]*rows), **kwargs)
@@ -109,6 +112,75 @@ def regplot(x, y, yerr=None, scatter_kwargs=None, ci_kwargs=None, text_kwargs=No
     ))
     
     return artists
+
+def _lineplot(data, x, y, yerr=None, weighted=False, ax=None, **kwargs):
+    if ax is None:
+        ax = plt.gca()
+    
+    x_, y_, yerr_ = [], [], []
+    for xi, group in data.groupby(x):
+        x_.append(xi)
+        yi = group[y]
+        if yerr is None:
+            yi, yerri = utils.np.nanmean(yi), utils.np.nansem(yi)
+        else:
+            yerri = group[yerr]
+            if weighted:
+                yi, yerri = utils.np.nanweightedmeanerr(yi, yerri)
+            else:
+                yi, yerri = utils.np.nanmeanerr(yi, yerri)
+        y_.append(yi)
+        yerr_.append(yerri)
+
+    l = ax.errorbar(x_, y_, yerr=yerr_, **kwargs)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    
+    return l
+
+def lineplot(data, x, y, yerr=None, hue=None, ax=None, **kwargs):
+    if ax is None:
+        ax = plt.gca()
+        
+    if hue is not None:
+        groupby = data.groupby(hue)
+        ls = {}
+        for i, (label, group) in enumerate(groupby):
+            l = _lineplot(group, x, y, yerr=yerr, label=label, color=mpl.cm.get_cmap('Blues')((i+1)/len(groupby)), ax=ax, **kwargs)
+            ls[label] = l
+        ax.legend(title=hue)
+        return ls
+    else:
+        return _lineplot(data, x, y, yerr=yerr, ax=ax, **kwargs)
+    
+def extract_data(obj):
+    if isinstance(obj, mpl.lines.Line2D):
+        x, y = obj.get_data()
+        x, y = x.astype(float), y.astype(float)
+        
+        data = {'x': x, 'y': y}
+    
+    elif isinstance(obj, mpl.container.ErrorbarContainer):
+        l, _, lc = obj
+        x, y = l.get_data()
+        x, y = x.astype(float), y.astype(float)
+        
+        if len(lc) != 1:
+            raise NotImplementedError()
+        lc = lc[0]
+        yerr = np.zeros((len(x), 2))
+        for i, l in enumerate(lc.get_segments()):
+            yerr[i,:] = l[:,1]
+            
+        if np.allclose(0.5*(yerr[:,0] + yerr[:,1]), y):
+            yerr = yerr[:,1] - y
+            
+        data = {'x': x, 'y': y, 'yerr': yerr}
+    
+    else:
+        raise NotImplementedError(f'Object with dtype {obj.dtype} not implemented')
+        
+    return data
 
 def vec(vec, origin=None, ax=None, pad=0.05, **kwargs):
     assert len(vec) == 2
