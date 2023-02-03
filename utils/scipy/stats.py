@@ -6,7 +6,7 @@ import numpy as np
 from numpy.testing import suppress_warnings
 from scipy import stats as spstats
 
-import utils
+from utils import np as unp
 
 BinnedStatisticddResult = namedtuple('BinnedStatisticddResult',
                                      ('statistic', 'bin_edges',
@@ -305,8 +305,8 @@ def binned_mean_dd(x, y, yerr=None, weighted=False, nanstats=True, **kwargs):
     
     if yerr is not None:
         statistics = {
-            'y': lambda y, yerr: getattr(utils.np, f'{nan}{weighted}meanerr')(y, yerr)[0],
-            'yerr': lambda y, yerr: getattr(utils.np, f'{nan}{weighted}meanerr')(y, yerr)[1]
+            'y': lambda y, yerr: getattr(unp, f'{nan}{weighted}meanerr')(y, yerr)[0],
+            'yerr': lambda y, yerr: getattr(unp, f'{nan}{weighted}meanerr')(y, yerr)[1]
         }
     else:
         statistics = {
