@@ -25,7 +25,7 @@ def _formatter(x, float_format=None, verbose=False):
             d = {k: type(v).__name__ for k, v in x.items()}
             return f"dict ({len(x)}) {d}"
         return f"dict ({len(x)})"
-    if isinstance(x, np.floating):
+    if isinstance(x, np.inexact):
         if float_format is None:
             return f'{x:.4f}'
         return float_format(x)
