@@ -71,17 +71,18 @@ def revert_dtypes(df):
             
     return df.astype(dtypes)
 
-def cross_join(*dfs, maintain_dtypes=True):
-    """
-    Efficient cross/cartesian product of numeric dataframes. Should be faster than df.join()
-    If maintain_dtypes=True, will ensure that the resulting DataFrame has the same dtypes as the original DataFrames.
-    However, maintain_dtypes=True is very slow in general.
-    """
-    columns = [column for df in dfs for column in df.columns]
-    dtypes = {k: v for df in dfs for k, v in df.dtypes.items()}
-    dfs = meshgrid_dd(*(revert_dtypes(df).to_numpy() for df in dfs)) # reverting dtypes makes meshgrid faster if all columns are numeric
-    df = np.concatenate([df.reshape(-1,df.shape[-1]) for df in dfs], axis=-1)
-    df = pd.DataFrame(df, columns=columns)
-    if maintain_dtypes:
-        return df.astype(dtypes)
-    return df
+# update: df.join actually seems faster
+# def cross_join(*dfs, maintain_dtypes=True):
+#     """
+#     Efficient cross/cartesian product of numeric dataframes. Should be faster than df.join()
+#     If maintain_dtypes=True, will ensure that the resulting DataFrame has the same dtypes as the original DataFrames.
+#     However, maintain_dtypes=True is very slow in general.
+#     """
+#     columns = [column for df in dfs for column in df.columns]
+#     dtypes = {k: v for df in dfs for k, v in df.dtypes.items()}
+#     dfs = meshgrid_dd(*(revert_dtypes(df).to_numpy() for df in dfs)) # reverting dtypes makes meshgrid faster if all columns are numeric
+#     df = np.concatenate([df.reshape(-1,df.shape[-1]) for df in dfs], axis=-1)
+#     df = pd.DataFrame(df, columns=columns)
+#     if maintain_dtypes:
+#         return df.astype(dtypes)
+#     return df
