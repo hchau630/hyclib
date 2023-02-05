@@ -2,6 +2,9 @@ import functools
 
 import numpy as np
 import torch
+import pandas as pd
+
+from .np import meshgrid_dd
 
 def _formatter(x, float_format=None, verbose=False):
     if isinstance(x, np.ndarray):
@@ -47,3 +50,38 @@ def display(df, float_format=None, verbose=False, **kwargs):
         raise RuntimeError("display only works in jupyter notebook")
         
     ipy_display(HTML(df.to_html(**default_kwargs)))
+    
+def revert_dtypes(df):
+    dtypes = {}
+    for k, v in df.dtypes.items():
+        v = str(v)
+        if 'Int' in v:
+            if df[k].isnull().any():
+                dtypes[k] = 'float'
+            else:
+                dtypes[k] = v.lower()
+        elif 'Float' in v:
+            dtypes[k] = v.lower()
+        elif 'boolean' in v:
+            dtypes[k] = 'bool'
+        elif pd.api.types.is_numeric_dtype(v): # could be complex, for example
+            dtypes[k] = v
+        else:
+            dtypes[k] = 'object'
+            
+    return df.astype(dtypes)
+
+def cross_join(*dfs, maintain_dtypes=True):
+    """
+    Efficient cross/cartesian product of numeric dataframes. Should be faster than df.join()
+    If maintain_dtypes=True, will ensure that the resulting DataFrame has the same dtypes as the original DataFrames.
+    However, maintain_dtypes=True is very slow in general.
+    """
+    columns = [column for df in dfs for column in df.columns]
+    dtypes = {k: v for df in dfs for k, v in df.dtypes.items()}
+    dfs = meshgrid_dd(*(revert_dtypes(df).to_numpy() for df in dfs)) # reverting dtypes makes meshgrid faster if all columns are numeric
+    df = np.concatenate([df.reshape(-1,df.shape[-1]) for df in dfs], axis=-1)
+    df = pd.DataFrame(df, columns=columns)
+    if maintain_dtypes:
+        return df.astype(dtypes)
+    return df
