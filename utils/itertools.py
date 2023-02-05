@@ -26,7 +26,7 @@ def flatten_seq(s, depth=-1, dtypes=[list, tuple]):
         if depth == 0 or not any([isinstance(elem, dtype) for dtype in dtypes]):
             flattened_s.append(elem)
         else:
-            flattened_s += flatten_seq(elem, depth=depth-1)
+            flattened_s += flatten_seq(elem, depth=depth-1, dtypes=dtypes)
     try:
         return type(s)(flattened_s)
     except Exception:

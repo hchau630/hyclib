@@ -63,9 +63,9 @@ def meshgrid(*arrs, **kwargs):
         
     arrs = (arr[...,None] for arr in arrs)
     arrs = meshgrid_dd(*arrs)
-    arrs = (arr.squeeze() for arr in arrs)
+    arrs = [arr.squeeze() for arr in arrs]
     
     if indexing == 'xy':
-        arrs = (np.swapaxes(arr, 0, 1) for arr in arrs)
+        arrs = [np.swapaxes(arr, 0, 1) for arr in arrs]
         
     return arrs
