@@ -19,6 +19,8 @@ from . import itertools, exceptions
 
 logger = logging.getLogger(__name__)
 
+ILLEGAL_KEYS = ['CLASS', 'PYTABLES_FORMAT_VERSION', 'TITLE', 'VERSION']
+
 def loadmat(filename):
     try:
         data = sio.loadmat(filename, simplify_cells=True)
@@ -79,6 +81,9 @@ def it_to_hdf(filename, data, groupname='', callback=None, errors='raise', delim
     
     with logging_redirect_tqdm():
         for k, v in tqdm(data, total=total, disable=(not progress)):
+            if k in ILLEGAL_KEYS:
+                raise ValueError(f'key cannot be one of {illegal_keys} since it conflicts with pandas metadata, but {k=} provided')
+                
             ks = k.split(delimiter)
             k = '/'.join(ks)
             
@@ -157,7 +162,7 @@ def hdf5_generator(hdfstore, h5pyfile, groupname='', counter=None):
             hdf_paths.append(path)
             if counter is not None:
                 if isinstance(obj, h5py.Group):
-                    counter.update(len(obj.attrs))
+                    counter.update(len([k for k in obj.attrs.keys() if k not in ILLEGAL_KEYS]))
                 else:
                     counter.update()
     group.visititems(func)
@@ -170,7 +175,8 @@ def hdf5_generator(hdfstore, h5pyfile, groupname='', counter=None):
             obj = group[str(path)]
             if isinstance(obj, h5py.Group):
                 for attr_name, attr in obj.attrs.items():
-                    yield str(path / attr_name), attr
+                    if attr_name not in ILLEGAL_KEYS:
+                        yield str(path / attr_name), attr
             else:
                 yield str(path), obj
             

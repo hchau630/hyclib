@@ -63,13 +63,32 @@ def revert_dtypes(df):
         elif 'Float' in v:
             dtypes[k] = v.lower()
         elif 'boolean' in v:
-            dtypes[k] = 'bool'
+            if df[k].isnull().any():
+                dtypes[k] = 'float'
+            else:
+                dtypes[k] = 'bool'
         elif pd.api.types.is_numeric_dtype(v): # could be complex, for example
             dtypes[k] = v
         else:
             dtypes[k] = 'object'
             
     return df.astype(dtypes)
+
+def to_tensor(x):
+    is_list = False
+    if isinstance(x, list):
+        x = np.array(x)
+        is_list = True
+    if isinstance(x, np.ndarray):
+        try:
+            if x.dtype.kind in ['m', 'M', 'O', 'S', 'U', 'V']:
+                return x.tolist() if is_list else x
+            if x.dtype.kind == 'f':
+                return torch.as_tensor(x, dtype=torch.float32)
+            return torch.as_tensor(x)
+        except Exception as err:
+            raise RuntimeError(f'Error converting to tensor: {x.dtype=}, {x=}') from err
+    return x
 
 # update: df.join actually seems faster
 # def cross_join(*dfs, maintain_dtypes=True):
