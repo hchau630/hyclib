@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='hyc-utils',
-    version='0.5.22',
+    version='0.5.23',
     packages=find_packages(),
     install_requires=[
         'numpy',
@@ -10,6 +10,11 @@ setup(
         'statsmodels',
         'torch',
         'tomli',
+        'h5py',
+        'pandas',
+        'tables', # optional dependency for pandas
+        'tqdm',
+        'mat73',
     ],
     extras_require={
         'test': ['pytest', 'scipy'],

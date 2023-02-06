@@ -1,0 +1,523 @@
+{
+    "190310_I127_1": {
+        "anal": {
+            "ROIinArtifact": "h5py.Dataset: shape (699,), dtype bool",
+            "baseMat": "h5py.Dataset: shape (31, 699), dtype float32",
+            "bwinToUse": "h5py.Dataset: shape (2,), dtype float64",
+            "cellsToExclude": "h5py.Dataset: shape (699,), dtype bool",
+            "cellsToInclude": "h5py.Dataset: shape (699,), dtype bool",
+            "defaultTrialsToUse": "h5py.Dataset: shape (401,), dtype bool",
+            "geoDistbyHolo": "h5py.Dataset: shape (31, 699), dtype float64",
+            "meanDistbyHolo": "h5py.Dataset: shape (31, 699), dtype float64",
+            "minDistbyHolo": "h5py.Dataset: shape (31, 699), dtype float64",
+            "numCells": "h5py.Dataset: shape (), dtype float64",
+            "numMat": "h5py.Dataset: shape (31,), dtype float64",
+            "numSpikesAddedPerCond": "h5py.Dataset: shape (31,), dtype float64",
+            "offTargetRisk": "h5py.Dataset: shape (10, 699), dtype float64",
+            "pVisR": "h5py.Dataset: shape (699,), dtype float64",
+            "recStartFrame": "h5py.Dataset: shape (), dtype float64",
+            "recStartTime": "h5py.Dataset: shape (), dtype float64",
+            "recWinUsed": "h5py.Dataset: shape (2,), dtype float64",
+            "respMat": "h5py.Dataset: shape (31, 699), dtype float32",
+            "stdMat": "h5py.Dataset: shape (31, 699), dtype float32",
+            "targets": "h5py.Dataset: shape (68,), dtype float64",
+            "visPercent": "h5py.Dataset: shape (), dtype float64"
+        },
+        "exp": {
+            "DAQepoch": "h5py.Dataset: shape (), dtype float64",
+            "allCoM": "h5py.Dataset: shape (699, 2), dtype float64",
+            "allData": "h5py.Dataset: shape (699, 18, 401), dtype float32",
+            "allDepth": "h5py.Dataset: shape (699,), dtype float64",
+            "bdata": "h5py.Dataset: shape (699, 401), dtype float32",
+            "dfData": "h5py.Dataset: shape (699, 18, 401), dtype float32",
+            "ensStimScore": "h5py.Dataset: shape (31,), dtype float64",
+            "holoTargets": "h5py.Dataset: shape (10,), dtype object",
+            "lowMotionTrials": "h5py.Dataset: shape (401,), dtype bool",
+            "lowRunTrials": "h5py.Dataset: shape (401,), dtype bool",
+            "outputsInfo": {
+                "attrs": {
+                    "OutputNames": "['Out 0. 0mW. No Pulses' 'Out 1. 75mW 30Hz x1 5ms wt '\n 'Out 2. 75mW 30Hz x5 5ms wt ' 'Out 3. 75mW 30Hz x15 5ms wt '\n 'Out 13. 75mW 30Hz x1 5ms wt ' 'Out 7. 75mW 30Hz x1 5ms wt '\n 'Out 8. 75mW 30Hz x5 5ms wt ' 'Out 21. 75mW 30Hz x15 5ms wt '\n 'Out 23. 75mW 30Hz x5 5ms wt ' 'Out 9. 75mW 30Hz x15 5ms wt '\n 'Out 10. 75mW 30Hz x1 5ms wt ' 'Out 16. 75mW 30Hz x1 5ms wt '\n 'Out 26. 75mW 30Hz x5 5ms wt ' 'Out 15. 75mW 30Hz x15 5ms wt '\n 'Out 14. 75mW 30Hz x5 5ms wt ' 'Out 4. 75mW 30Hz x1 5ms wt '\n 'Out 19. 75mW 30Hz x1 5ms wt ' 'Out 28. 75mW 30Hz x1 5ms wt '\n 'Out 20. 75mW 30Hz x5 5ms wt ' 'Out 24. 75mW 30Hz x15 5ms wt '\n 'Out 25. 75mW 30Hz x1 5ms wt ' 'Out 12. 75mW 30Hz x15 5ms wt '\n 'Out 30. 75mW 30Hz x15 5ms wt ' 'Out 5. 75mW 30Hz x5 5ms wt '\n 'Out 27. 75mW 30Hz x15 5ms wt ' 'Out 29. 75mW 30Hz x5 5ms wt '\n 'Out 22. 75mW 30Hz x1 5ms wt ' 'Out 11. 75mW 30Hz x5 5ms wt '\n 'Out 17. 75mW 30Hz x5 5ms wt ' 'Out 6. 75mW 30Hz x15 5ms wt '\n 'Out 18. 75mW 30Hz x15 5ms wt ']"
+                },
+                "OutputOrder": "h5py.Dataset: shape (31,), dtype float64",
+                "OutputPatterns": "h5py.Dataset: shape (31, 40000, 10), dtype float64",
+                "OutputStims": "h5py.Dataset: shape (31,), dtype float64"
+            },
+            "rdData": "h5py.Dataset: shape (699, 401), dtype float32",
+            "rois": "h5py.Dataset: shape (10,), dtype object",
+            "runVal": "h5py.Dataset: shape (401, 12), dtype float64",
+            "stimCoM": "h5py.Dataset: shape (150, 2), dtype float64",
+            "stimDepth": "h5py.Dataset: shape (150,), dtype float64",
+            "stimID": "h5py.Dataset: shape (401,), dtype float64",
+            "stimParams": {
+                "Hz": "h5py.Dataset: shape (30,), dtype float64",
+                "Seq": "h5py.Dataset: shape (31,), dtype float64",
+                "numCells": "h5py.Dataset: shape (30,), dtype float64",
+                "numPulse": "h5py.Dataset: shape (31,), dtype float64",
+                "roi": "h5py.Dataset: shape (31,), dtype float64"
+            },
+            "stimSuccessTrial": "h5py.Dataset: shape (401,), dtype float64",
+            "targetedCells": "h5py.Dataset: shape (150,), dtype float64",
+            "visID": "h5py.Dataset: shape (401,), dtype float64",
+            "visStart": "h5py.Dataset: shape (), dtype float64",
+            "visStop": "h5py.Dataset: shape (), dtype float64",
+            "zdfData": "h5py.Dataset: shape (699, 18, 401), dtype float32"
+        },
+        "info": {
+            "attrs": {
+                "ExpressionType": "PHP CAG",
+                "GenoType": "double",
+                "date": "190310",
+                "epochText1": "['Spontenous activity with movie'\n 'Spontenous no movie (may have missed first daq)' 'ONline PowerCurve'\n 'Exp added Spikes' 'With vis stim ']",
+                "epochText2": "['' '' '' '' '']",
+                "mouse": "I127_1",
+                "outputNames": "[['\\rAll off']\n ['just image']\n ['Out 1. 10mW 30Hz x10 5ms wt 1 cell']\n ['Out 2. 25mW 30Hz x10 5ms wt 1 cell']\n ['Out 3. 50mW 30Hz x10 5ms wt 1 cell']\n ['Out 4. 100mW 30Hz x10 5ms wt 1 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 75mW 30Hz x1 5ms wt ']\n ['Out 2. 75mW 30Hz x5 5ms wt ']\n ['Out 3. 75mW 30Hz x15 5ms wt ']\n ['Out 4. 75mW 30Hz x1 5ms wt ']\n ['Out 5. 75mW 30Hz x5 5ms wt ']\n ['Out 6. 75mW 30Hz x15 5ms wt ']\n ['Out 7. 75mW 30Hz x1 5ms wt ']\n ['Out 8. 75mW 30Hz x5 5ms wt ']\n ['Out 9. 75mW 30Hz x15 5ms wt ']\n ['Out 10. 75mW 30Hz x1 5ms wt ']\n ['Out 11. 75mW 30Hz x5 5ms wt ']\n ['Out 12. 75mW 30Hz x15 5ms wt ']\n ['Out 13. 75mW 30Hz x1 5ms wt ']\n ['Out 14. 75mW 30Hz x5 5ms wt ']\n ['Out 15. 75mW 30Hz x15 5ms wt ']\n ['Out 16. 75mW 30Hz x1 5ms wt ']\n ['Out 17. 75mW 30Hz x5 5ms wt ']\n ['Out 18. 75mW 30Hz x15 5ms wt ']\n ['Out 19. 75mW 30Hz x1 5ms wt ']\n ['Out 20. 75mW 30Hz x5 5ms wt ']\n ['Out 21. 75mW 30Hz x15 5ms wt ']\n ['Out 22. 75mW 30Hz x1 5ms wt ']\n ['Out 23. 75mW 30Hz x5 5ms wt ']\n ['Out 24. 75mW 30Hz x15 5ms wt ']\n ['Out 25. 75mW 30Hz x1 5ms wt ']\n ['Out 26. 75mW 30Hz x5 5ms wt ']\n ['Out 27. 75mW 30Hz x15 5ms wt ']\n ['Out 28. 75mW 30Hz x1 5ms wt ']\n ['Out 29. 75mW 30Hz x5 5ms wt ']\n ['Out 30. 75mW 30Hz x15 5ms wt ']]",
+                "path": "C:\\Users\\ian\\Documents\\DATA\\F\\I127_1\\190310\\1_2_3_4_5"
+            },
+            "ExpressionTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "FR": "h5py.Dataset: shape (), dtype float64",
+            "GenoTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "offsets": "h5py.Dataset: shape (2,), dtype float64",
+            "params": {
+                "attrs": {
+                    "ConfigSettings": "Default",
+                    "Configs": "",
+                    "ExpType": "I127.1 additional spikes",
+                    "PMTs": "",
+                    "PMTsEditText": "",
+                    "age": "DOB 9/4/18",
+                    "brainregion": "Expresion",
+                    "genotype": "emx x teto\r",
+                    "internal": "na",
+                    "notes": "Looks dimmer than yesterday...",
+                    "slice": "16% 920nm Lz-200. depth 216; 0 30 60; ",
+                    "virus": "12/19/18 phpeb DIO ChroME"
+                }
+            }
+        }
+    },
+    "190415_I127_1": {
+        "anal": {
+            "ROIinArtifact": "h5py.Dataset: shape (615,), dtype bool",
+            "baseMat": "h5py.Dataset: shape (5, 615), dtype float32",
+            "bwinToUse": "h5py.Dataset: shape (2,), dtype float64",
+            "cellsToExclude": "h5py.Dataset: shape (615,), dtype bool",
+            "cellsToInclude": "h5py.Dataset: shape (615,), dtype bool",
+            "defaultTrialsToUse": "h5py.Dataset: shape (63,), dtype bool",
+            "geoDistbyHolo": "h5py.Dataset: shape (5, 615), dtype float64",
+            "meanDistbyHolo": "h5py.Dataset: shape (5, 615), dtype float64",
+            "minDistbyHolo": "h5py.Dataset: shape (5, 615), dtype float64",
+            "numCells": "h5py.Dataset: shape (), dtype float64",
+            "numMat": "h5py.Dataset: shape (5,), dtype float64",
+            "numSpikesAddedPerCond": "h5py.Dataset: shape (5,), dtype float64",
+            "offTargetRisk": "h5py.Dataset: shape (20, 615), dtype float64",
+            "pVisR": "h5py.Dataset: shape (615,), dtype float64",
+            "recStartFrame": "h5py.Dataset: shape (), dtype float64",
+            "recStartTime": "h5py.Dataset: shape (), dtype float64",
+            "recWinUsed": "h5py.Dataset: shape (2,), dtype float64",
+            "respMat": "h5py.Dataset: shape (5, 615), dtype float32",
+            "stdMat": "h5py.Dataset: shape (5, 615), dtype float32",
+            "targets": "h5py.Dataset: shape (90,), dtype float64",
+            "visPercent": "h5py.Dataset: shape (), dtype float64"
+        },
+        "exp": {
+            "allCoM": "h5py.Dataset: shape (615, 2), dtype float64",
+            "allData": "h5py.Dataset: shape (615, 48, 63), dtype float32",
+            "allDepth": "h5py.Dataset: shape (615,), dtype float64",
+            "bdata": "h5py.Dataset: shape (615, 63), dtype float32",
+            "dfData": "h5py.Dataset: shape (615, 48, 63), dtype float32",
+            "ensStimScore": "h5py.Dataset: shape (5,), dtype float64",
+            "holoTargets": "h5py.Dataset: shape (20,), dtype object",
+            "lowMotionTrials": "h5py.Dataset: shape (63,), dtype bool",
+            "lowRunTrials": "h5py.Dataset: shape (63,), dtype bool",
+            "outputsInfo": {
+                "attrs": {
+                    "OutputNames": "['Out 0. 0mW. No Pulses' 'Out 1. 50mW 30Hz x1 6ms wt 5 cell'\n 'Out 2. 100mW 30Hz x1 6ms wt 5 cell' 'Out 3. 50mW 30Hz x5 6ms wt 5 cell'\n 'Out 4. 100mW 30Hz x5 6ms wt 5 cell']"
+                },
+                "OutputOrder": "h5py.Dataset: shape (5,), dtype float64",
+                "OutputPatterns": "h5py.Dataset: shape (5, 100000, 10), dtype float64",
+                "OutputStims": "h5py.Dataset: shape (5,), dtype float64"
+            },
+            "rdData": "h5py.Dataset: shape (615, 63), dtype float32",
+            "rois": "h5py.Dataset: shape (20,), dtype object",
+            "runVal": "h5py.Dataset: shape (63, 31), dtype float64",
+            "stimCoM": "h5py.Dataset: shape (153, 2), dtype float64",
+            "stimDepth": "h5py.Dataset: shape (153,), dtype float64",
+            "stimID": "h5py.Dataset: shape (63,), dtype float64",
+            "stimParams": {
+                "Hz": "h5py.Dataset: shape (4,), dtype float64",
+                "Seq": "h5py.Dataset: shape (5,), dtype float64",
+                "numCells": "h5py.Dataset: shape (4,), dtype float64",
+                "numPulse": "h5py.Dataset: shape (5,), dtype float64",
+                "powers": "h5py.Dataset: shape (2, 2), dtype float64",
+                "roi": "h5py.Dataset: shape (5,), dtype float64"
+            },
+            "stimSuccessTrial": "h5py.Dataset: shape (63,), dtype float64",
+            "targetedCells": "h5py.Dataset: shape (153,), dtype float64",
+            "visID": "h5py.Dataset: shape (63,), dtype float64",
+            "visStart": "h5py.Dataset: shape (), dtype float64",
+            "zdfData": "h5py.Dataset: shape (615, 48, 63), dtype float32"
+        },
+        "info": {
+            "attrs": {
+                "ExpressionType": "PHP CAG",
+                "GenoType": "double",
+                "date": "190415",
+                "epochText1": "['' '' 'Only Activated Cells 1 at at time' 'Groups of 5' 'Groups of 10'\n 'groups of 5; 1 or 5 spikes'\n '1000 frames of vis activity (charlie Chapman)']",
+                "epochText2": "['' '' '' '' '' '' '']",
+                "mouse": "I127_1",
+                "outputNames": "[['\\rAll off']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x5 6ms wt 1 cell']\n ['Out 2. 100mW 30Hz x5 6ms wt 1 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x5 6ms wt 5 cell']\n ['Out 2. 100mW 30Hz x5 6ms wt 5 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x5 6ms wt 10 cell']\n ['Out 2. 100mW 30Hz x5 6ms wt 10 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x1 6ms wt 5 cell']\n ['Out 2. 100mW 30Hz x1 6ms wt 5 cell']\n ['Out 3. 50mW 30Hz x5 6ms wt 5 cell']\n ['Out 4. 100mW 30Hz x5 6ms wt 5 cell']]",
+                "path": "C:\\Users\\ian\\Documents\\DATA\\F\\I127_1\\190415\\1_2_3_4_5_6_7"
+            },
+            "ExpressionTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "FR": "h5py.Dataset: shape (), dtype float64",
+            "GenoTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "offsets": "h5py.Dataset: shape (2,), dtype float64",
+            "params": {
+                "attrs": {
+                    "ConfigSettings": "Default",
+                    "Configs": "",
+                    "ExpType": "I127",
+                    "PMTs": "601 552",
+                    "PMTsEditText": "",
+                    "age": "old",
+                    "brainregion": "expression brightest",
+                    "genotype": "emx teto php\r",
+                    "internal": "na",
+                    "notes": "Continue from before; online analysis died not sure how to recover continuing. DAQ died (erased h) had to restart",
+                    "slice": "13% 200um deep. Lz -236 0 30 60",
+                    "virus": "php old"
+                }
+            }
+        }
+    },
+    "190418_I127_1": {
+        "anal": {
+            "ROIinArtifact": "h5py.Dataset: shape (802,), dtype bool",
+            "baseMat": "h5py.Dataset: shape (2, 802), dtype float32",
+            "bwinToUse": "h5py.Dataset: shape (2,), dtype float64",
+            "cellsToExclude": "h5py.Dataset: shape (802,), dtype bool",
+            "cellsToInclude": "h5py.Dataset: shape (802,), dtype bool",
+            "defaultTrialsToUse": "h5py.Dataset: shape (303,), dtype bool",
+            "geoDistbyHolo": "h5py.Dataset: shape (2, 802), dtype float64",
+            "meanDistbyHolo": "h5py.Dataset: shape (2, 802), dtype float64",
+            "minDistbyHolo": "h5py.Dataset: shape (2, 802), dtype float64",
+            "numCells": "h5py.Dataset: shape (), dtype float64",
+            "numMat": "h5py.Dataset: shape (2,), dtype float64",
+            "numSpikesAddedPerCond": "h5py.Dataset: shape (2,), dtype float64",
+            "offTargetRisk": "h5py.Dataset: shape (802,), dtype float64",
+            "pVisR": "h5py.Dataset: shape (802,), dtype float64",
+            "recStartFrame": "h5py.Dataset: shape (), dtype float64",
+            "recStartTime": "h5py.Dataset: shape (), dtype float64",
+            "recWinUsed": "h5py.Dataset: shape (2,), dtype float64",
+            "respMat": "h5py.Dataset: shape (2, 802), dtype float32",
+            "stdMat": "h5py.Dataset: shape (2, 802), dtype float32",
+            "targets": "h5py.Dataset: shape (3,), dtype float64",
+            "visPercent": "h5py.Dataset: shape (), dtype float64"
+        },
+        "exp": {
+            "DAQepoch": "h5py.Dataset: shape (), dtype float64",
+            "NPcoef": "h5py.Dataset: shape (802,), dtype float64",
+            "allCoM": "h5py.Dataset: shape (802, 2), dtype float64",
+            "allData": "h5py.Dataset: shape (802, 31, 303), dtype float32",
+            "allDataNoNP": "h5py.Dataset: shape (802, 31, 303), dtype float32",
+            "allDepth": "h5py.Dataset: shape (802,), dtype float64",
+            "allNP": "h5py.Dataset: shape (802, 31, 303), dtype float32",
+            "bdata": "h5py.Dataset: shape (802, 303), dtype float32",
+            "dfData": "h5py.Dataset: shape (802, 31, 303), dtype float32",
+            "ensStimScore": "h5py.Dataset: shape (2,), dtype float64",
+            "holoTargets": "h5py.Dataset: shape (1,), dtype object",
+            "lowMotionTrials": "h5py.Dataset: shape (303,), dtype bool",
+            "lowRunTrials": "h5py.Dataset: shape (303,), dtype bool",
+            "outputsInfo": {
+                "attrs": {
+                    "OutputNames": "['Out 0. 0mW. No Pulses' 'Out 1. 100mW 50Hz x10 10ms wt 3 cell']"
+                },
+                "OutputOrder": "h5py.Dataset: shape (2,), dtype float64",
+                "OutputPatterns": "h5py.Dataset: shape (2, 60000, 10), dtype float64",
+                "OutputStims": "h5py.Dataset: shape (2,), dtype float64"
+            },
+            "rdData": "h5py.Dataset: shape (802, 303), dtype float32",
+            "rois": "h5py.Dataset: shape (1,), dtype object",
+            "runVal": "h5py.Dataset: shape (303, 19), dtype float64",
+            "stimCoM": "h5py.Dataset: shape (101, 2), dtype float64",
+            "stimDepth": "h5py.Dataset: shape (101,), dtype float64",
+            "stimID": "h5py.Dataset: shape (303,), dtype float64",
+            "stimParams": {
+                "Hz": "h5py.Dataset: shape (), dtype float64",
+                "Seq": "h5py.Dataset: shape (2,), dtype float64",
+                "numCells": "h5py.Dataset: shape (), dtype float64",
+                "numPulse": "h5py.Dataset: shape (2,), dtype float64",
+                "powers": "h5py.Dataset: shape (3,), dtype float64",
+                "roi": "h5py.Dataset: shape (2,), dtype float64"
+            },
+            "stimSuccessTrial": "h5py.Dataset: shape (303,), dtype float64",
+            "targetedCells": "h5py.Dataset: shape (101,), dtype float64",
+            "visCond": "h5py.Dataset: shape (2, 303), dtype float64",
+            "visID": "h5py.Dataset: shape (303,), dtype float64",
+            "visStart": "h5py.Dataset: shape (), dtype float64",
+            "zdfData": "h5py.Dataset: shape (802, 31, 303), dtype float32"
+        },
+        "info": {
+            "attrs": {
+                "ExpressionType": "PHP CAG",
+                "GenoType": "double",
+                "dataPath2": "Y:\\frankenshare\\ian\\190418\\I127.1\\12",
+                "date": "190418",
+                "epochText1": "['' '' '' '' '' '' 'orientation tuning' 'ori tuning try 2' 'ori try 3'\n 'pc attempt1' 'PC'\n '3 hologram conditions; 90/270 pref; mixed pref; no pref; and no stim. 2 vis conditions no stim and ']",
+                "epochText2": "['' '' '' '' '' '' '' '' '' '' 'not enough frames but '\n '3 cells by 10 spikes; water evaporated had to reup; accidentally 50Hz instead of 30']",
+                "mouse": "I127_1",
+                "outputNames": "[['\\rAll off']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x5 6ms wt 1 cell']\n ['Out 2. 100mW 30Hz x5 6ms wt 1 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 50Hz x10 10ms wt 3 cell']\n ['Out 2. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 3. 50mW 50Hz x10 10ms wt 3 cell']\n ['Out 4. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 5. 50mW 50Hz x10 10ms wt 3 cell']\n ['Out 6. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 2. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 3. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 2. 100mW 50Hz x10 10ms wt 3 cell']\n ['Out 3. 100mW 50Hz x10 10ms wt 3 cell']]",
+                "path": "C:\\Users\\ian\\Documents\\DATA\\F\\I127_1\\190418\\2_3_4_5_6_8_9_10_11_12"
+            },
+            "ExpressionTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "FR": "h5py.Dataset: shape (), dtype float64",
+            "GenoTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "OpsinImage": "h5py.Dataset: shape (3, 512, 512), dtype uint8",
+            "offsets": "h5py.Dataset: shape (2,), dtype float64",
+            "opsinNegative": "h5py.Dataset: shape (802,), dtype float64",
+            "params": {
+                "attrs": {
+                    "ConfigSettings": "Default",
+                    "Configs": "",
+                    "ExpType": "I127_1",
+                    "PMTs": "548 552",
+                    "PMTsEditText": "",
+                    "age": "old",
+                    "brainregion": "lateral decently well",
+                    "genotype": "orientation ensemble experiments",
+                    "internal": "",
+                    "notes": "",
+                    "slice": "0 30 60 lz-230 14% ~230 (not precise)",
+                    "virus": "php eb old"
+                }
+            },
+            "value1020": "h5py.Dataset: shape (802,), dtype float64",
+            "value1020Targets": "h5py.Dataset: shape (101,), dtype float64"
+        },
+        "vis": {
+            "allData": "h5py.Dataset: shape (802, 18, 92), dtype float32",
+            "bdata": "h5py.Dataset: shape (802, 92), dtype float32",
+            "bwin": "h5py.Dataset: shape (2,), dtype float64",
+            "lowMotionTrials": "h5py.Dataset: shape (92,), dtype bool",
+            "lowRunTrials": "h5py.Dataset: shape (92,), dtype bool",
+            "rdData": "h5py.Dataset: shape (802, 92), dtype float32",
+            "runVal": "h5py.Dataset: shape (92, 15), dtype float64",
+            "visID": "h5py.Dataset: shape (92,), dtype float64",
+            "visStart": "h5py.Dataset: shape (), dtype float64",
+            "visStop": "h5py.Dataset: shape (), dtype float64",
+            "win": "h5py.Dataset: shape (2,), dtype float64",
+            "zdfData": "h5py.Dataset: shape (802, 18, 92), dtype float32"
+        }
+    },
+    "190420_I127_1": {
+        "anal": {
+            "ROIinArtifact": "h5py.Dataset: shape (654,), dtype bool",
+            "baseMat": "h5py.Dataset: shape (61, 654), dtype float32",
+            "bwinToUse": "h5py.Dataset: shape (2,), dtype float64",
+            "cellsToExclude": "h5py.Dataset: shape (654,), dtype bool",
+            "cellsToInclude": "h5py.Dataset: shape (654,), dtype bool",
+            "defaultTrialsToUse": "h5py.Dataset: shape (1001,), dtype bool",
+            "geoDistbyHolo": "h5py.Dataset: shape (61, 654), dtype float64",
+            "meanDistbyHolo": "h5py.Dataset: shape (61, 654), dtype float64",
+            "minDistbyHolo": "h5py.Dataset: shape (61, 654), dtype float64",
+            "numCells": "h5py.Dataset: shape (), dtype float64",
+            "numMat": "h5py.Dataset: shape (61,), dtype float64",
+            "numSpikesAddedPerCond": "h5py.Dataset: shape (61,), dtype float64",
+            "offTargetRisk": "h5py.Dataset: shape (60, 654), dtype float64",
+            "pVisR": "h5py.Dataset: shape (654,), dtype float64",
+            "recStartFrame": "h5py.Dataset: shape (), dtype float64",
+            "recStartTime": "h5py.Dataset: shape (), dtype float64",
+            "recWinUsed": "h5py.Dataset: shape (2,), dtype float64",
+            "respMat": "h5py.Dataset: shape (61, 654), dtype float32",
+            "stdMat": "h5py.Dataset: shape (61, 654), dtype float32",
+            "targets": "h5py.Dataset: shape (113,), dtype float64",
+            "visPercent": "h5py.Dataset: shape (), dtype float64"
+        },
+        "exp": {
+            "allCoM": "h5py.Dataset: shape (654, 2), dtype float64",
+            "allData": "h5py.Dataset: shape (654, 18, 1001), dtype float32",
+            "allDepth": "h5py.Dataset: shape (654,), dtype float64",
+            "bdata": "h5py.Dataset: shape (654, 1001), dtype float32",
+            "dfData": "h5py.Dataset: shape (654, 18, 1001), dtype float32",
+            "ensStimScore": "h5py.Dataset: shape (61,), dtype float64",
+            "holoTargets": "h5py.Dataset: shape (60,), dtype object",
+            "lowMotionTrials": "h5py.Dataset: shape (1001,), dtype bool",
+            "lowRunTrials": "h5py.Dataset: shape (1001,), dtype bool",
+            "outputsInfo": {
+                "attrs": {
+                    "OutputNames": "['off' 'Out 1. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 2. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 3. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 4. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 5. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 6. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 7. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 8. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 9. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 10. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 11. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 12. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 13. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 14. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 15. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 16. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 17. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 18. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 19. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 20. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 21. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 22. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 23. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 24. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 25. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 26. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 27. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 28. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 29. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 30. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 31. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 32. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 33. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 34. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 35. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 36. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 37. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 38. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 39. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 40. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 41. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 42. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 43. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 44. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 45. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 46. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 47. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 48. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 49. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 50. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 51. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 52. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 53. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 54. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 55. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 56. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 57. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 58. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 59. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 60. 100mW 30Hz x10 10ms wt 10 cell']"
+                },
+                "OutputOrder": "h5py.Dataset: shape (61,), dtype float64",
+                "OutputPatterns": "h5py.Dataset: shape (61, 40000, 10), dtype float64",
+                "OutputStims": "h5py.Dataset: shape (61,), dtype float64"
+            },
+            "rdData": "h5py.Dataset: shape (654, 1001), dtype float32",
+            "rois": "h5py.Dataset: shape (60,), dtype object",
+            "runVal": "h5py.Dataset: shape (1001, 12), dtype float64",
+            "stimCoM": "h5py.Dataset: shape (201, 2), dtype float64",
+            "stimDepth": "h5py.Dataset: shape (201,), dtype float64",
+            "stimID": "h5py.Dataset: shape (1001,), dtype float64",
+            "stimParams": {
+                "Hz": "h5py.Dataset: shape (60,), dtype float64",
+                "Seq": "h5py.Dataset: shape (61,), dtype float64",
+                "numCells": "h5py.Dataset: shape (60,), dtype float64",
+                "numPulse": "h5py.Dataset: shape (61,), dtype float64",
+                "powers": "h5py.Dataset: shape (60,), dtype float64",
+                "roi": "h5py.Dataset: shape (61,), dtype float64"
+            },
+            "stimSuccessTrial": "h5py.Dataset: shape (1001,), dtype float64",
+            "targetedCells": "h5py.Dataset: shape (201,), dtype float64",
+            "visID": "h5py.Dataset: shape (1001,), dtype float64",
+            "visStart": "h5py.Dataset: shape (), dtype float64",
+            "zdfData": "h5py.Dataset: shape (654, 18, 1001), dtype float32"
+        },
+        "info": {
+            "attrs": {
+                "ExpressionType": "PHP CAG",
+                "GenoType": "double",
+                "date": "190420",
+                "epochText1": "['60s Spont activity Nothing going'\n 'Spont Activity with movie (charlie chapman you tube)'\n 'More movie time laser off. ' 'PowerCurve'\n 'The Exp 60 holos of 10 Targets ' 'Errors restarting' 'restarted '\n 'SI frames dropped' '' 'xx' 'Same as before but with movie playing'\n 'Spon Act w movie' 'Spont Act No movie']",
+                "epochText2": "['' '' '' '' '' '' '' \"can't adjust postion anymore\" '' '' '' '' '']",
+                "mouse": "I127_1",
+                "outputNames": "[['\\rAll off']\n ['off']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x5 6ms wt 1 cell']\n ['Out 2. 100mW 30Hz x5 6ms wt 1 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 2. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 3. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 4. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 5. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 6. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 7. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 8. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 9. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 10. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 11. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 12. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 13. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 14. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 15. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 16. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 17. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 18. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 19. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 20. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 21. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 22. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 23. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 24. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 25. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 26. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 27. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 28. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 29. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 30. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 31. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 32. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 33. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 34. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 35. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 36. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 37. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 38. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 39. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 40. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 41. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 42. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 43. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 44. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 45. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 46. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 47. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 48. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 49. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 50. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 51. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 52. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 53. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 54. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 55. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 56. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 57. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 58. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 59. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 60. 100mW 30Hz x10 10ms wt 10 cell']]",
+                "path": "C:\\Users\\ian\\Documents\\DATA\\F\\I127_1\\190420\\1_2_3_4_5_7_8_10_11_12_13"
+            },
+            "ExpressionTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "FR": "h5py.Dataset: shape (), dtype float64",
+            "GenoTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "offsets": "h5py.Dataset: shape (2,), dtype float64",
+            "params": {
+                "attrs": {
+                    "ConfigSettings": "Default",
+                    "Configs": "",
+                    "ExpType": "I127",
+                    "PMTs": "547 552",
+                    "PMTsEditText": "",
+                    "age": "?",
+                    "brainregion": "",
+                    "genotype": "Ensemble Based on Distance",
+                    "internal": "",
+                    "notes": "Holograms Decided by distance near groups and far groups. 6 of each type; activateable cells only; 200 deep",
+                    "slice": "13% Laser; 0 30 60; Lz-230",
+                    "virus": ""
+                }
+            }
+        },
+        "vis": {
+            "allData": "h5py.Dataset: shape (654, 400, 2), dtype float32",
+            "bdata": "h5py.Dataset: shape (654, 1001), dtype float32",
+            "bwin": "h5py.Dataset: shape (2,), dtype float64",
+            "lowMotionTrials": "h5py.Dataset: shape (1001,), dtype bool",
+            "lowRunTrials": "h5py.Dataset: shape (1001,), dtype bool",
+            "rdData": "h5py.Dataset: shape (654, 1001), dtype float32",
+            "runVal": "h5py.Dataset: shape (1001, 18), dtype float64",
+            "visID": "h5py.Dataset: shape (1001,), dtype float64",
+            "visStart": "h5py.Dataset: shape (), dtype float64",
+            "win": "h5py.Dataset: shape (2,), dtype float64",
+            "zdfData": "h5py.Dataset: shape (654, 18, 1001), dtype float32"
+        }
+    },
+    "190429_I127_1": {
+        "attrs": {
+            "OutputNames": "['Out 0. 0mW. No Pulses' 'Out 1. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 2. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 3. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 4. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 5. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 6. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 7. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 8. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 9. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 10. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 11. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 12. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 13. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 14. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 15. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 16. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 17. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 18. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 19. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 20. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 21. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 22. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 23. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 24. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 25. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 26. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 27. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 28. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 29. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 30. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 31. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 32. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 33. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 34. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 35. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 36. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 37. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 38. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 39. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 40. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 41. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 42. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 43. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 44. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 45. 100mW 30Hz x10 10ms wt 10 cell']"
+        },
+        "OutputOrder": "h5py.Dataset: shape (46,), dtype float64",
+        "OutputPatterns": "h5py.Dataset: shape (46, 40000, 10), dtype float64",
+        "OutputStims": "h5py.Dataset: shape (46,), dtype float64",
+        "anal": {
+            "ROIinArtifact": "h5py.Dataset: shape (741,), dtype bool",
+            "baseMat": "h5py.Dataset: shape (46, 741), dtype float32",
+            "bwinToUse": "h5py.Dataset: shape (2,), dtype float64",
+            "cellsToExclude": "h5py.Dataset: shape (741,), dtype bool",
+            "cellsToInclude": "h5py.Dataset: shape (741,), dtype bool",
+            "defaultTrialsToUse": "h5py.Dataset: shape (910,), dtype bool",
+            "geoDistbyHolo": "h5py.Dataset: shape (46, 741), dtype float64",
+            "meanDistbyHolo": "h5py.Dataset: shape (46, 741), dtype float64",
+            "minDistbyHolo": "h5py.Dataset: shape (46, 741), dtype float64",
+            "numCells": "h5py.Dataset: shape (), dtype float64",
+            "numMat": "h5py.Dataset: shape (46,), dtype float64",
+            "numSpikesAddedPerCond": "h5py.Dataset: shape (46,), dtype float64",
+            "offTargetRisk": "h5py.Dataset: shape (15, 741), dtype float64",
+            "pVisR": "h5py.Dataset: shape (741,), dtype float64",
+            "recStartFrame": "h5py.Dataset: shape (), dtype float64",
+            "recStartTime": "h5py.Dataset: shape (), dtype float64",
+            "recWinUsed": "h5py.Dataset: shape (2,), dtype float64",
+            "respMat": "h5py.Dataset: shape (46, 741), dtype float32",
+            "stdMat": "h5py.Dataset: shape (46, 741), dtype float32",
+            "targets": "h5py.Dataset: shape (59,), dtype float64",
+            "visPercent": "h5py.Dataset: shape (), dtype float64"
+        },
+        "exp": {
+            "DAQepoch": "h5py.Dataset: shape (), dtype float64",
+            "allCoM": "h5py.Dataset: shape (741, 2), dtype float64",
+            "allData": "h5py.Dataset: shape (741, 25, 910), dtype float32",
+            "allDepth": "h5py.Dataset: shape (741,), dtype float64",
+            "bdata": "h5py.Dataset: shape (741, 910), dtype float32",
+            "dfData": "h5py.Dataset: shape (741, 25, 910), dtype float32",
+            "ensStimScore": "h5py.Dataset: shape (46,), dtype float64",
+            "holoTargets": "h5py.Dataset: shape (15,), dtype object",
+            "lowMotionTrials": "h5py.Dataset: shape (910,), dtype bool",
+            "lowRunTrials": "h5py.Dataset: shape (910,), dtype bool",
+            "outputsInfo": {
+                "attrs": {
+                    "OutputNames": "['Out 0. 0mW. No Pulses' 'Out 1. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 2. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 3. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 4. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 5. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 6. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 7. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 8. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 9. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 10. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 11. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 12. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 13. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 14. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 15. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 16. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 17. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 18. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 19. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 20. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 21. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 22. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 23. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 24. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 25. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 26. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 27. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 28. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 29. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 30. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 31. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 32. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 33. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 34. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 35. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 36. 100mW 30Hz x10 10ms wt 10 cell'\n 'Out 37. 100mW 30Hz x1 10ms wt 1 cell'\n 'Out 38. 100mW 30Hz x5 10ms wt 1 cell'\n 'Out 39. 100mW 30Hz x10 10ms wt 1 cell'\n 'Out 40. 100mW 30Hz x1 10ms wt 5 cell'\n 'Out 41. 100mW 30Hz x5 10ms wt 5 cell'\n 'Out 42. 100mW 30Hz x10 10ms wt 5 cell'\n 'Out 43. 100mW 30Hz x1 10ms wt 10 cell'\n 'Out 44. 100mW 30Hz x5 10ms wt 10 cell'\n 'Out 45. 100mW 30Hz x10 10ms wt 10 cell']"
+                },
+                "OutputOrder": "h5py.Dataset: shape (46,), dtype float64",
+                "OutputPatterns": "h5py.Dataset: shape (46, 40000, 10), dtype float64",
+                "OutputStims": "h5py.Dataset: shape (46,), dtype float64"
+            },
+            "rdData": "h5py.Dataset: shape (741, 910), dtype float32",
+            "rois": "h5py.Dataset: shape (15,), dtype object",
+            "runVal": "h5py.Dataset: shape (910, 12), dtype float64",
+            "stimCoM": "h5py.Dataset: shape (124, 2), dtype float64",
+            "stimDepth": "h5py.Dataset: shape (124,), dtype float64",
+            "stimID": "h5py.Dataset: shape (910,), dtype float64",
+            "stimParams": {
+                "Hz": "h5py.Dataset: shape (45,), dtype float64",
+                "Seq": "h5py.Dataset: shape (46,), dtype float64",
+                "numCells": "h5py.Dataset: shape (45,), dtype float64",
+                "numPulse": "h5py.Dataset: shape (46,), dtype float64",
+                "powers": "h5py.Dataset: shape (45,), dtype float64",
+                "roi": "h5py.Dataset: shape (46,), dtype float64"
+            },
+            "stimSuccessTrial": "h5py.Dataset: shape (910,), dtype float64",
+            "targetedCells": "h5py.Dataset: shape (124,), dtype float64",
+            "visID": "h5py.Dataset: shape (910,), dtype float64",
+            "visStart": "h5py.Dataset: shape (), dtype float64",
+            "visStop": "h5py.Dataset: shape (), dtype float64",
+            "zdfData": "h5py.Dataset: shape (741, 25, 910), dtype float32"
+        },
+        "info": {
+            "attrs": {
+                "ExpressionType": "PHP CAG",
+                "GenoType": "double",
+                "date": "190429",
+                "epochText1": "['' 'spont' 'PC' 'Power Curve of Eligible Cells'\n 'spikes added. 1 5 or 10 spikes in 1 5 or 10 cells. ' 'spont']",
+                "epochText2": "['' '' '' '' '' '']",
+                "mouse": "I127_1",
+                "outputNames": "[['\\rAll off']\n ['off']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x5 6ms wt 1 cell']\n ['Out 2. 100mW 30Hz x5 6ms wt 1 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 50mW 30Hz x5 6ms wt 1 cell']\n ['Out 2. 75mW 30Hz x5 6ms wt 1 cell']\n ['Out 3. 100mW 30Hz x5 6ms wt 1 cell']\n ['Out 0. 0mW. No Pulses']\n ['Out 1. 100mW 30Hz x1 10ms wt 1 cell']\n ['Out 2. 100mW 30Hz x5 10ms wt 1 cell']\n ['Out 3. 100mW 30Hz x10 10ms wt 1 cell']\n ['Out 4. 100mW 30Hz x1 10ms wt 5 cell']\n ['Out 5. 100mW 30Hz x5 10ms wt 5 cell']\n ['Out 6. 100mW 30Hz x10 10ms wt 5 cell']\n ['Out 7. 100mW 30Hz x1 10ms wt 10 cell']\n ['Out 8. 100mW 30Hz x5 10ms wt 10 cell']\n ['Out 9. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 10. 100mW 30Hz x1 10ms wt 1 cell']\n ['Out 11. 100mW 30Hz x5 10ms wt 1 cell']\n ['Out 12. 100mW 30Hz x10 10ms wt 1 cell']\n ['Out 13. 100mW 30Hz x1 10ms wt 5 cell']\n ['Out 14. 100mW 30Hz x5 10ms wt 5 cell']\n ['Out 15. 100mW 30Hz x10 10ms wt 5 cell']\n ['Out 16. 100mW 30Hz x1 10ms wt 10 cell']\n ['Out 17. 100mW 30Hz x5 10ms wt 10 cell']\n ['Out 18. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 19. 100mW 30Hz x1 10ms wt 1 cell']\n ['Out 20. 100mW 30Hz x5 10ms wt 1 cell']\n ['Out 21. 100mW 30Hz x10 10ms wt 1 cell']\n ['Out 22. 100mW 30Hz x1 10ms wt 5 cell']\n ['Out 23. 100mW 30Hz x5 10ms wt 5 cell']\n ['Out 24. 100mW 30Hz x10 10ms wt 5 cell']\n ['Out 25. 100mW 30Hz x1 10ms wt 10 cell']\n ['Out 26. 100mW 30Hz x5 10ms wt 10 cell']\n ['Out 27. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 28. 100mW 30Hz x1 10ms wt 1 cell']\n ['Out 29. 100mW 30Hz x5 10ms wt 1 cell']\n ['Out 30. 100mW 30Hz x10 10ms wt 1 cell']\n ['Out 31. 100mW 30Hz x1 10ms wt 5 cell']\n ['Out 32. 100mW 30Hz x5 10ms wt 5 cell']\n ['Out 33. 100mW 30Hz x10 10ms wt 5 cell']\n ['Out 34. 100mW 30Hz x1 10ms wt 10 cell']\n ['Out 35. 100mW 30Hz x5 10ms wt 10 cell']\n ['Out 36. 100mW 30Hz x10 10ms wt 10 cell']\n ['Out 37. 100mW 30Hz x1 10ms wt 1 cell']\n ['Out 38. 100mW 30Hz x5 10ms wt 1 cell']\n ['Out 39. 100mW 30Hz x10 10ms wt 1 cell']\n ['Out 40. 100mW 30Hz x1 10ms wt 5 cell']\n ['Out 41. 100mW 30Hz x5 10ms wt 5 cell']\n ['Out 42. 100mW 30Hz x10 10ms wt 5 cell']\n ['Out 43. 100mW 30Hz x1 10ms wt 10 cell']\n ['Out 44. 100mW 30Hz x5 10ms wt 10 cell']\n ['Out 45. 100mW 30Hz x10 10ms wt 10 cell']]",
+                "path": "C:\\Users\\ian\\Documents\\DATA\\F\\I127_1\\190429\\2_3_4_5_6"
+            },
+            "ExpressionTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "FR": "h5py.Dataset: shape (), dtype float64",
+            "GenoTypeNum": "h5py.Dataset: shape (), dtype float64",
+            "offsets": "h5py.Dataset: shape (2,), dtype float64",
+            "params": {
+                "attrs": {
+                    "ConfigSettings": "Default",
+                    "Configs": "",
+                    "ExpType": "I127_1 Spikes Added Exp",
+                    "PMTs": "552 552",
+                    "PMTsEditText": "",
+                    "age": "old",
+                    "brainregion": "near the H",
+                    "genotype": "",
+                    "internal": "15% laser Lz off 205 deep.",
+                    "notes": "",
+                    "slice": "0 30 60",
+                    "virus": "php from december"
+                }
+            }
+        }
+    }
+}

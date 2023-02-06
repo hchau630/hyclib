@@ -76,6 +76,13 @@ def dict_get(d, k, delimiter='.'):
         v = v[ki]
     return v
 
+# dict_set is a better version of assign_dict
+def dict_set(d, k, v, delimiter='.'):
+    ks = k.split(delimiter)
+    for ki in ks[:-1]:
+        d = d.setdefault(ki, {})
+    d[ks[-1]] = v
+
 def assign_dict(d, keys, value):
     """
     Assign (potentially nested) value to dictionary using a list/tuple of keys

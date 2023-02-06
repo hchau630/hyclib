@@ -1,6 +1,6 @@
 # notebook requirements
-pandas
 seaborn
+ipympl
 
 # development requirements
 nbdime # for git merging notebooks

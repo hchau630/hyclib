@@ -1,6 +1,7 @@
 # notebook requirements
-pandas
+tables==3.7.0 # tables 3.8.0 for some reason doesn't work on my Macbook, saying it cannot find HDF5 installation
 seaborn
+ipympl
 
 # development requirements
 nbdime # for git merging notebooks
