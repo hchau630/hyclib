@@ -1,10 +1,14 @@
 import functools
+import logging
 
 import numpy as np
 import torch
 import pandas as pd
 
 from .np import meshgrid_dd
+from .sp import stats
+
+logger = logging.getLogger(__name__)
 
 def _formatter(x, float_format=None, verbose=False):
     if isinstance(x, np.ndarray):
@@ -51,28 +55,82 @@ def display(df, float_format=None, verbose=False, **kwargs):
         
     ipy_display(HTML(df.to_html(**default_kwargs)))
     
-def revert_dtypes(df):
-    dtypes = {}
-    for k, v in df.dtypes.items():
-        v = str(v)
-        if 'Int' in v:
-            if df[k].isnull().any():
-                dtypes[k] = 'float'
-            else:
-                dtypes[k] = v.lower()
-        elif 'Float' in v:
-            dtypes[k] = v.lower()
-        elif 'boolean' in v:
-            if df[k].isnull().any():
-                dtypes[k] = 'float'
-            else:
-                dtypes[k] = 'bool'
-        elif pd.api.types.is_numeric_dtype(v): # could be complex, for example
-            dtypes[k] = v
-        else:
-            dtypes[k] = 'object'
+def digitize(x, column=None, colname=None, copy=True, new_cols=True, **kwargs):
+    if isinstance(x, pd.Series):
+        if column is not None:
+            logger.warning("Attemping to digitize pd.Series with non-None column argument. column argument is ignored.")
+        if colname is None:
+            colname = 'x'
+        column = colname
+        x = pd.DataFrame({colname: x})
             
-    return df.astype(dtypes)
+    elif isinstance(x, pd.DataFrame):
+        if colname is not None:
+            logger.warning("Attemping to digitize pd.DataFrame with non-None colname argument. colname argument is ignored.")
+        if len(x.columns) == 1:
+            column = x.columns.values[0] if column is None else column
+        if len(x.columns) > 1 and column is None:
+            raise ValueError("column must be provided if number of columns in the provided dataframe is greater than 1.")
+            
+    else:
+        raise TypeError(f"x must be pd.Series or pd.DataFrame, but {type(x)} provided.")
+        
+    if copy:
+        x = x.copy() # not necessary if x was a pd.Series, but whatever
+        
+    if isinstance(column, str):
+        sample = revert_dtypes(x[column]).to_numpy()
+        bin_nums, centers, edges = stats.digitize(sample, **kwargs)
+        if new_cols:
+            x[f'{column}_bin_center'] = centers[bin_nums]
+            x[f'{column}_bin_ledge'] = np.array([-np.inf] + list(edges))[bin_nums]
+            x[f'{column}_bin_redge'] = np.array(list(edges) + [np.inf])[bin_nums]
+        else:
+            x[column] = centers[bin_nums]
+    else:
+        sample = np.array([revert_dtypes(x[c]).to_numpy() for c in column]).T # (N,D)
+        bin_nums, centers, edges = stats.digitize_dd(sample, **kwargs)
+        for b, c, e, col in zip(bin_nums, centers, edges, column):
+            if new_cols:
+                x[f'{col}_bin_center'] = c[b]
+                x[f'{col}_bin_ledge'] = np.array([-np.inf] + list(e))[b]
+                x[f'{col}_bin_redge'] = np.array(list(e) + [np.inf])[b]
+            else:
+                x[col] = c[b]
+            
+    if new_cols:
+        return x
+    return x, edges
+    
+def get_np_dtype(x):
+    if not isinstance(x, pd.Series):
+        raise TypeError(f'input must be pd.Series, but got {type(x)}')
+    
+    dtype = str(x.dtype)
+    if 'Int' in dtype:
+        if x.isnull().any():
+            return 'float'
+        return dtype.lower()
+    elif 'Float' in dtype:
+        return dtype.lower()
+    elif 'boolean' in dtype:
+        if x.isnull().any():
+            return 'float'
+        return 'bool'
+    elif pd.api.types.is_numeric_dtype(dtype): # could be complex, for example
+        return dtype
+    else:
+        return 'object'
+    
+def revert_dtypes(x):
+    if isinstance(x, pd.Series):
+        return x.astype(get_np_dtype(x))
+    
+    if isinstance(x, pd.DataFrame):
+        dtypes = {col: get_np_dtype(x[col]) for col in x.columns}
+        return x.astype(dtypes)
+    
+    raise TypeError(f'x must be pd.Series or pd.DataFrame, but got {type(x)}')
 
 def to_tensor(x):
     is_list = False

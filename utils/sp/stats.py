@@ -299,6 +299,64 @@ def binned_statistic_dd(sample, values, values_err=None, statistic='mean',
 
     return BinnedStatisticddResult(result, edges, binnumbers)
 
+
+def digitize_dd(sample, bins=10, range=None, expand_binnumbers=True):
+    try:
+        bins = index(bins)
+    except TypeError:
+        # bins is not an integer
+        pass
+    # If bins was an integer-like object, now it is an actual Python int.
+
+    # NOTE: for _bin_edges(), see e.g. gh-11365
+    if isinstance(bins, int) and not np.isfinite(sample).all():
+        raise ValueError('%r contains non-finite values.' % (sample,))
+
+    # `Ndim` is the number of dimensions (e.g. `2` for `binned_statistic_2d`)
+    # `Dlen` is the length of elements along each dimension.
+    # This code is based on np.histogramdd
+    try:
+        # `sample` is an ND-array.
+        Dlen, Ndim = sample.shape
+    except (AttributeError, ValueError):
+        # `sample` is a sequence of 1D arrays.
+        sample = np.atleast_2d(sample).T
+        Dlen, Ndim = sample.shape
+        
+    try:
+        M = len(bins)
+        if M != Ndim:
+            raise AttributeError('The dimension of bins must be equal '
+                                 'to the dimension of the sample x.')
+    except TypeError:
+        bins = Ndim * [bins]
+        
+    nbin, edges, dedges = _bin_edges(sample, bins, range)
+    binnumbers = _bin_numbers(sample, nbin, edges, dedges)
+    
+    # Unravel binnumbers into an ndarray, each row the bins for each dimension
+    if expand_binnumbers and Ndim > 1:
+        binnumbers = np.asarray(np.unravel_index(binnumbers, nbin))
+        
+    centers = [np.array([np.nan] + list(0.5*(e[:-1]+e[1:])) + [np.nan]) for e in edges]
+    return binnumbers, centers, edges
+
+def digitize(sample, bins=10, range=None):
+    try:
+        N = len(bins)
+    except TypeError:
+        N = 1
+
+    if N != 1:
+        bins = [np.asarray(bins, float)]
+
+    if range is not None:
+        if len(range) == 2:
+            range = [range]
+            
+    bin_nums, centers, edges = digitize_dd(sample, bins=bins, range=range)
+    return bin_nums, centers[0], edges[0]
+
 def binned_mean_dd(x, y, yerr=None, weighted=False, nanstats=True, **kwargs):
     nan = 'nan' if nanstats else ''
     weighted = 'weighted' if weighted else ''
@@ -309,9 +367,12 @@ def binned_mean_dd(x, y, yerr=None, weighted=False, nanstats=True, **kwargs):
             'yerr': lambda y, yerr: getattr(npstats, f'{nan}{weighted}meanerr')(y, yerr)[1]
         }
     else:
+        if weighted:
+            raise ValueError("weighted is True, but yerr is not provided")
+            
         statistics = {
-            'y': 'mean',
-            'yerr': 'sem',
+            'y': lambda y: getattr(npstats, f'{nan}mean')(y),
+            'yerr': lambda y: getattr(npstats, f'{nan}sem')(y),
         }
     
     result = {}
