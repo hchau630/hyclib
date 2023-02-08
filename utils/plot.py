@@ -113,7 +113,14 @@ def regplot(x, y, yerr=None, scatter_kwargs=None, ci_kwargs=None, text_kwargs=No
     
     return artists
 
-def _lineplot(data, x, y, yerr=None, weighted=False, ax=None, **kwargs):
+def _lineplot(data, x, y, yerr=None, weighted=False, errstyle='fill', ax=None, **kwargs):
+    default_kwargs = {
+        'errorbar_kwargs': {},
+        'plot_kwargs': {},
+        'fill_kwargs': {'alpha': 0.25},
+    }
+    kwargs = {k: v | (kwargs[k] if k in kwargs else v) for k, v in default_kwargs.items()}
+    
     if ax is None:
         ax = plt.gca()
     
@@ -131,8 +138,16 @@ def _lineplot(data, x, y, yerr=None, weighted=False, ax=None, **kwargs):
                 yi, yerri = utils.np.nanmeanerr(yi, yerri)
         y_.append(yi)
         yerr_.append(yerri)
+    x_, y_, yerr_ = np.array(x_), np.array(y_), np.array(yerr_)
 
-    l = ax.errorbar(x_, y_, yerr=yerr_, **kwargs)
+    if errstyle == 'bar':
+        l = ax.errorbar(x_, y_, yerr=yerr_, **kwargs['errorbar_kwargs'])
+    elif errstyle == 'fill':
+        l1 = ax.plot(x_, y_, **kwargs['plot_kwargs'])
+        l2 = ax.fill_between(x_, y_-yerr_, y_+yerr_, **kwargs['fill_kwargs'])
+        l = (l1, l2)
+    else:
+        raise ValueError(f"errstyle must be 'fill' or 'bar', but {errstyle=} given.")
     ax.set_xlabel(x)
     ax.set_ylabel(y)
     

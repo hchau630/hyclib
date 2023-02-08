@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='hyc-utils',
-    version='0.5.25',
+    version='0.5.26',
     packages=find_packages(),
     install_requires=[
         'numpy',
