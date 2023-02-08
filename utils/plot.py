@@ -113,10 +113,10 @@ def regplot(x, y, yerr=None, scatter_kwargs=None, ci_kwargs=None, text_kwargs=No
     
     return artists
 
-def _lineplot(data, x, y, yerr=None, weighted=False, errstyle='fill', ax=None, **kwargs):
+def _lineplot(data, x, y, yerr=None, weighted=False, label=None, errstyle='fill', ax=None, **kwargs):
     default_kwargs = {
-        'errorbar_kwargs': {},
-        'plot_kwargs': {},
+        'errorbar_kwargs': {'label': label},
+        'plot_kwargs': {'label': label},
         'fill_kwargs': {'alpha': 0.25},
     }
     kwargs = {k: v | (kwargs[k] if k in kwargs else v) for k, v in default_kwargs.items()}
