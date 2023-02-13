@@ -101,6 +101,28 @@ def digitize(x, column=None, colname=None, copy=True, new_cols=True, **kwargs):
     if new_cols:
         return x
     return x, edges
+
+def mean(df, *, by, y='y'):
+    df = df.copy()
+    yerr = f'{y}err'
+    group = df.groupby(by)
+    df = pd.DataFrame({
+        y: group[y].mean(),
+        yerr: group[y].sem(),
+    }).reset_index()
+    return df
+
+def meanerr(df, *, by, y='y', yerr='yerr'):
+    assert all([x not in ['y_', 'yvar'] for x in [y, yerr]])
+    df = df.copy()
+    df['y_'] = df[y] + df[yerr]*0
+    df['yvar'] = df[y]*0 + df[yerr]**2
+    group = df.groupby(by)
+    df = pd.DataFrame({
+        y: group['y_'].mean(),
+        yerr: (group['yvar'].mean() + group['y_'].var())**0.5 / group['y_'].count()**0.5,
+    }).reset_index()
+    return df
     
 def get_np_dtype(x):
     if not isinstance(x, pd.Series):
