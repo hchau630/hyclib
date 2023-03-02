@@ -1,13 +1,15 @@
 from setuptools import setup, find_packages
+import pathlib
 
-with open('README.me') as f:
-    README = f.read()
+this_directory = pathlib.Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='hyc-utils',
     version='0.5.30',
     description='Commonly used tools across my own personal projects',
-    long_description=README,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     packages=find_packages(),
     install_requires=[
         'numpy',
