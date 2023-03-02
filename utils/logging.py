@@ -1,4 +1,5 @@
 import logging
+import contextlib
 
 import utils
 
@@ -12,3 +13,12 @@ def basic_parser(**kwargs):
         'format': dict(opt_str=['--lf', '--log-format']),
     }, **kwargs)
     return parser
+
+@contextlib.contextmanager
+def set_level(logger, level):
+    current_level = logger.level
+    try:
+        logger.setLevel(level)
+        yield
+    finally:
+        logger.setLevel(current_level)

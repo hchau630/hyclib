@@ -1,5 +1,8 @@
-# notebook requirements
+torch>=1.13.1
+numpy>=1.24.2
 tables==3.7.0 # tables 3.8.0 for some reason doesn't work on my Macbook, saying it cannot find HDF5 installation
+
+# notebook requirements
 seaborn
 ipympl
 

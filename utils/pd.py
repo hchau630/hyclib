@@ -2,6 +2,7 @@ import functools
 import logging
 
 import numpy as np
+import numpy.ma as ma
 import torch
 import pandas as pd
 
@@ -11,11 +12,26 @@ from .sp import stats
 logger = logging.getLogger(__name__)
 
 def _formatter(x, float_format=None, verbose=False):
+    if float_format is None:
+        float_format = '{:.4f}'.format
+        
     if isinstance(x, np.ndarray):
+        if x.ndim == 0:
+            if ma.is_masked(x):
+                return "NA"
+            elif isinstance(x, np.inexact):
+                return float_format(x)
+            else:
+                return str(x)
         if verbose:
             return f"np.ndarray {x.shape} ({x.dtype})"
         return f"{x.shape}"
     if isinstance(x, torch.Tensor):
+        if x.ndim == 0:
+            if x.is_floating_point():
+                return float_format(x.item())
+            else:
+                return str(x.item())
         if verbose:
             return f"torch.Tensor {tuple(x.shape)} ({x.dtype})"
         return f"{tuple(x.shape)}"
@@ -33,8 +49,6 @@ def _formatter(x, float_format=None, verbose=False):
             return f"dict ({len(x)}) {d}"
         return f"dict ({len(x)})"
     if isinstance(x, np.inexact):
-        if float_format is None:
-            return f'{x:.4f}'
         return float_format(x)
     return str(x)
 

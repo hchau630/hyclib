@@ -69,6 +69,8 @@ def nancorrcoef(x, y=None, **kwargs):
     return ma.corrcoef(x, y=y, **kwargs)
 
 def meanerr(y, yerr, axis=None):
+    y, yerr = np.array(y), np.array(yerr)
+    
     assert y.shape == yerr.shape
     
     y = np.mean(y, axis=axis)
@@ -77,6 +79,8 @@ def meanerr(y, yerr, axis=None):
     return y, yerr
 
 def nanmeanerr(y, yerr, axis=None):
+    y, yerr = np.array(y), np.array(yerr)
+    
     assert y.shape == yerr.shape
     
     nans = np.isnan(y) | np.isnan(yerr)
@@ -96,6 +100,8 @@ def weightedmeanerr(y, yerr, axis=None):
     Reference:
     Bevington and Robinson - Data Reduction and Error Analysis
     """
+    y, yerr = np.array(y), np.array(yerr)
+    
     assert y.shape == yerr.shape
     
     y = np.sum(y/yerr**2, axis=axis) / np.sum(1/yerr**2, axis=axis) # eq. 4.17 in reference
@@ -110,6 +116,7 @@ def nanweightedmeanerr(y, yerr, axis=None):
     Reference:
     Bevington and Robinson - Data Reduction and Error Analysis
     """
+    y, yerr = np.array(y), np.array(yerr)
     
     assert y.shape == yerr.shape
     

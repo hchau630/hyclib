@@ -60,25 +60,41 @@ def flatten_dict(d, depth=-1):
     return flattened_dict
 
 def dict_iter(d, delimiter='.'):
+    """
+    Iterates over all leaf nodes of a dictionary in (key, value) pairs
+    If delimiter is None, key is a tuple of the nested keys
+    Otherwise, key is a string with the nested keys joined by delimiter
+    """
     assert isinstance(d, dict)
     
     for k, v in d.items():
         if isinstance(v, dict):
             for ki, vi in dict_iter(v, delimiter=delimiter):
-                yield (delimiter.join([k, ki]), vi)
+                if delimiter is None:
+                    yield ((k, *ki), vi)
+                else:
+                    yield (delimiter.join([k, ki]), vi)
         
         else:
             yield (k, v)
             
 def dict_get(d, k, delimiter='.'):
-    v = d
-    for ki in k.split(delimiter):
-        v = v[ki]
-    return v
+    if delimiter is None:
+        ks = k
+    else:
+        ks = k.split(delimiter)
+        
+    for ki in ks:
+        d = d[ki]
+    return d
 
-# dict_set is a better version of assign_dict
+# more general version of assign_dict
 def dict_set(d, k, v, delimiter='.'):
-    ks = k.split(delimiter)
+    if delimiter is None:
+        ks = k
+    else:
+        ks = k.split(delimiter)
+        
     for ki in ks[:-1]:
         d = d.setdefault(ki, {})
     d[ks[-1]] = v
