@@ -6,7 +6,7 @@ with open('README.me') as f:
 setup(
     name='hyc-utils',
     version='0.5.30',
-    description='Commonly used tools across my own personal projects'
+    description='Commonly used tools across my own personal projects',
     long_description=README,
     packages=find_packages(),
     install_requires=[
