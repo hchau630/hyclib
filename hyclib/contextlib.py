@@ -3,9 +3,14 @@ import signal
 import sys
 import random
 import contextlib
+import logging
+import pathlib
+import shutil
 
 import numpy as np
 import torch
+
+logger = logging.getLogger(__name__)
 
 #########################################################
 ### python script containing various context managers ###
@@ -23,16 +28,16 @@ class SimulFileHandler:
         
     def cleanup(self):
         if all([os.path.isfile(filename) for filename in self.filenames]):
-            print("All files exist. No cleanup needed.")
+            logger.debug("All files exist. No cleanup needed.")
             return
-        print("Cleaning up...")
+        logger.debug("Cleaning up...")
         for filename in self.filenames:
             if os.path.isfile(filename):
                 os.remove(filename)
-        print("Finished cleanup.")
+        logger.debug("Finished cleanup.")
         
     def handler(self, signum, frame):
-        print(f"Received signal {signal.strsignal(signum)}.")
+        logger.info(f"Received signal {signal.strsignal(signum)}.")
         sys.exit(0) # This throws the exception SystemExit, which is then caught by __exit__ and triggers self.cleanup()
     
     def __enter__(self):
@@ -40,7 +45,7 @@ class SimulFileHandler:
         
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is not None:
-            print(f"Caught exception {exc_type}: {exc_val}")
+            logger.info(f"Caught exception {exc_type}: {exc_val}")
         self.cleanup()
         signal.signal(signal.SIGTERM, self.old_sigterm)
 
@@ -54,14 +59,14 @@ class TmpFileHandler:
         self.tmp_filenames = tmp_filenames
         
     def cleanup(self):
-        print("Cleaning up...")
+        logger.debug("Cleaning up...")
         for tmp_filename in self.tmp_filenames:
             if os.path.isfile(tmp_filename):
                 os.remove(tmp_filename)
-        print("Finished cleanup.")
+        logger.debug("Finished cleanup.")
         
     def handler(self, signum, frame):
-        print(f"Received signal {signal.strsignal(signum)}.")
+        logger.info(f"Received signal {signal.strsignal(signum)}.")
         sys.exit(0) # This throws the exception SystemExit, which is then caught by __exit__ and triggers self.cleanup()
     
     def __enter__(self):
@@ -69,7 +74,35 @@ class TmpFileHandler:
         
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is not None:
-            print(f"Caught exception {exc_type}: {exc_val}")
+            logger.info(f"Caught exception {exc_type}: {exc_val}")
+        self.cleanup()
+        signal.signal(signal.SIGTERM, self.old_sigterm)
+        
+class TmpDirHandler:
+    """
+    A context manager that removes all temporary files within the directories tmp_dirs
+    upon encountering an exception or a termination signal SIGTERM.
+    """
+    def __init__(self, *tmp_dirs):
+        self.tmp_dirs = [pathlib.Path(tmp_dir) for tmp_dir in tmp_dirs]
+        
+    def cleanup(self):
+        logger.debug("Cleaning up...")
+        for tmp_dir in self.tmp_dirs:
+            if tmp_dir.is_dir():
+                shutil.rmtree(tmp_dir)
+        logger.debug("Finished cleanup.")
+        
+    def handler(self, signum, frame):
+        logger.info(f"Received signal {signal.strsignal(signum)}.")
+        sys.exit(0) # This throws the exception SystemExit, which is then caught by __exit__ and triggers self.cleanup()
+    
+    def __enter__(self):
+        self.old_sigterm = signal.signal(signal.SIGTERM, self.handler)
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            logger.info(f"Caught exception {exc_type}: {exc_val}")
         self.cleanup()
         signal.signal(signal.SIGTERM, self.old_sigterm)
         

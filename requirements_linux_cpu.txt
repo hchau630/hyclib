@@ -2,9 +2,13 @@
 seaborn
 ipympl
 
+# testing requirements
+pytest
+scipy
+
 # development requirements
 nbdime # for git merging notebooks
 twine
 
 --extra-index-url https://download.pytorch.org/whl/cpu  # cpu only install of pytorch
--e .[test]
+-e .

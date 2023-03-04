@@ -5,11 +5,12 @@ this_directory = pathlib.Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(
-    name='hyc-utils',
-    version='0.5.30',
+    name='hyclib',
+    version='0.1.0',
     description='Commonly used tools across my own personal projects',
     long_description=long_description,
     long_description_content_type='text/markdown',
+    url="https://github.com/hchau630/hyclib",
     packages=find_packages(),
     install_requires=[
         'numpy',
@@ -24,8 +25,5 @@ setup(
         'mat73',
         'platformdirs',
     ],
-    extras_require={
-        'test': ['pytest', 'scipy'],
-    },
     include_package_data=True,
 )

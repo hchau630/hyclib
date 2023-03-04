@@ -6,8 +6,8 @@ import torch
 import numpy as np
 import numpy.ma as ma
 
-from utils import np as unp
-from utils import pt
+from ..np import isconst
+from .. import pt
 
 def unpack_args(f):
     @functools.wraps(f)
@@ -22,7 +22,7 @@ def concat(arrs, dim=0):
         raise ValueError(f"arrs must be at least length 1, but {len(arrs)=}.")
 
     is_tensor = [Array(arr).is_tensor for arr in arrs]
-    if not unp.isconst(is_tensor):
+    if not isconst(is_tensor):
         raise TypeError(f"Underlying data of arrs must either all be torch.Tensor or all be np.ndarray, but {is_tensor=}.")
 
     is_tensor = is_tensor[0]

@@ -8,8 +8,8 @@ import numpy as np
 import numpy.ma as ma
 import pandas as pd
 
-from utils import itertools, timeit
-from utils import np as unp
+from .. import itertools, timeit
+from .. import np as unp
 from . import array as ar
 from . import parsing
 

@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 
-import utils
+import hyclib as lib
 
 @pytest.mark.parametrize('filename', [
     ('test_load_config.toml'),
@@ -10,21 +10,21 @@ import utils
 ])
 def test_load(filename, pytestconfig):
     data_path = pathlib.Path(pytestconfig.rootdir) / 'test' / 'data'
-    config = utils.config.load(data_path / filename)
+    config = lib.config.load(data_path / filename)
     assert config == {'a': 1, 'b': 'hi', 'c': True, 'd': [10, 11]}
     
 def test_dump(tmp_path):
     config = {'a': 1, 'b': 'hi', 'c': True, 'd': [10, 11]}
     filename = tmp_path / 'config.json'
-    utils.config.dump(config, filename)
-    loaded_config = utils.config.load(filename)
+    lib.config.dump(config, filename)
+    loaded_config = lib.config.load(filename)
     assert loaded_config == config
     
 def test_expand(pytestconfig):
     filename = 'test_expand_config.toml'
     data_path = pathlib.Path(pytestconfig.rootdir) / 'test' / 'data'
-    d = utils.config.load(data_path / filename)
-    configs = utils.config.expand(d)
+    d = lib.config.load(data_path / filename)
+    configs = lib.config.expand(d)
     print(*configs, sep='\n')
     assert configs == [
         {'a': 1, 'b': 'hihi', 'c': [0,1,2,3]},
@@ -46,7 +46,7 @@ def test_expand(pytestconfig):
 ])
 def test_expand_invalid(filename, pytestconfig):
     data_path = pathlib.Path(pytestconfig.rootdir) / 'test' / 'data'
-    d = utils.config.load(data_path / filename)
+    d = lib.config.load(data_path / filename)
     with pytest.raises(ValueError):
-        utils.config.expand(d)
+        lib.config.expand(d)
         

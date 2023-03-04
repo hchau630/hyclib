@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import pytest
 
-import utils
+import hyclib as lib
 
 @pytest.mark.parametrize('w', [
     torch.tensor([[ 0.6455,  torch.nan, -0.9379, -0.0359, -0.1765, -0.3408, -1.9616,  0.1720,
@@ -18,7 +18,7 @@ import utils
 ])
 def test_bincount(w):
     a = torch.tensor([0,0,1,1,1,0,2,1,2,0])
-    t = utils.pt.bincount(a, weights=w)
+    t = lib.pt.bincount(a, weights=w)
     
     if w.ndim == 2:
         arr = []

@@ -4,7 +4,7 @@ from matplotlib.offsetbox import AnchoredText
 import statsmodels.api as sm
 import numpy as np
 
-import utils
+import hyclib as lib
 
 def subplots(rows, cols, plot_size=(6.4,4.8), keep_shape=False, **kwargs):
     fig, axes = plt.subplots(rows, cols, figsize=(plot_size[0]*cols, plot_size[1]*rows), **kwargs)
@@ -129,13 +129,13 @@ def _lineplot(data, x, y, yerr=None, weighted=False, label=None, errstyle='fill'
         x_.append(xi)
         yi = group[y]
         if yerr is None:
-            yi, yerri = utils.np.nanmean(yi), utils.np.nansem(yi)
+            yi, yerri = lib.np.nanmean(yi), lib.np.nansem(yi)
         else:
             yerri = group[yerr]
             if weighted:
-                yi, yerri = utils.np.nanweightedmeanerr(yi, yerri)
+                yi, yerri = lib.np.nanweightedmeanerr(yi, yerri)
             else:
-                yi, yerri = utils.np.nanmeanerr(yi, yerri)
+                yi, yerri = lib.np.nanmeanerr(yi, yerri)
         y_.append(yi)
         yerr_.append(yerri)
     x_, y_, yerr_ = np.array(x_), np.array(y_), np.array(yerr_)

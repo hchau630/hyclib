@@ -1,7 +1,7 @@
 import json
 import copy
 
-from utils import exceptions
+from . import exceptions
 
 class Parameter:
     def __init__(self, data=None, dtype=None, is_jsonable=True, deepcopy=False, load_callback=None):

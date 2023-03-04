@@ -1,7 +1,7 @@
 import pytest
 import argparse
 
-import utils
+import hyclib as lib
 
 def func_0(a, b: int, hi_bye: str = 'hibye', hell_o: float = 0.3, debug=False):
     return a, b, hi_bye, hell_o
@@ -11,7 +11,7 @@ def func_1(d, e: float, f: str = 'bye'):
    
 @pytest.fixture
 def parser_0():
-    parser = utils.argparse.default_parser(func_0, configs={
+    parser = lib.argparse.default_parser(func_0, configs={
             'a': dict(opt_str=['-a'], type=int),
             'b': dict(opt_str=['-b']),
             'hi_bye': dict(opt_str=['--hi', '--hi-bye']),
@@ -24,7 +24,7 @@ def parser_0():
 
 @pytest.fixture
 def parser_1():
-    parser = utils.argparse.default_parser(func_1, configs={
+    parser = lib.argparse.default_parser(func_1, configs={
             'e': dict(choices=[0.5,0.7,0.9]),
         },
         add_help=False,
@@ -46,7 +46,7 @@ def parser_1():
      {'d': 'blah', 'e': 0.5, 'f': 'hihi'}),
 ])
 def test_multi_parse(parser_0, parser_1, args, expected_0, expected_1):
-    args_0, args_1 = utils.argparse.multi_parse([parser_0, parser_1], args=args)
+    args_0, args_1 = lib.argparse.multi_parse([parser_0, parser_1], args=args)
     assert vars(args_0) == expected_0
     assert vars(args_1) == expected_1
     
@@ -58,8 +58,8 @@ def test_multi_parse(parser_0, parser_1, args, expected_0, expected_1):
 ])
 def test_multi_parse_bad_choice(parser_0, parser_1, args, expected_0, expected_1):
     with pytest.raises(SystemExit):
-        args_0, args_1 = utils.argparse.multi_parse([parser_0, parser_1], args=args)
+        args_0, args_1 = lib.argparse.multi_parse([parser_0, parser_1], args=args)
         
 def test_multi_parse_help(parser_0, parser_1):
     with pytest.raises(SystemExit):
-        utils.argparse.multi_parse([parser_0, parser_1], args=['-h'])
+        lib.argparse.multi_parse([parser_0, parser_1], args=['-h'])

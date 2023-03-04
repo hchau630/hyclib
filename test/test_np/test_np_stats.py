@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import scipy.stats as stats
 
-import utils
+import hyclib as lib
 
 @pytest.fixture
 def y():
@@ -31,16 +31,16 @@ def yerr():
     return yerr
 
 def test_sem(y):
-    assert np.allclose(utils.np.sem(y), stats.sem(y, axis=None, ddof=1), equal_nan=True)
-    assert np.allclose(utils.np.sem(y, axis=1), stats.sem(y, axis=1, ddof=1), equal_nan=True)
-    assert np.allclose(utils.np.sem(y, ddof=0), stats.sem(y, axis=None, ddof=0), equal_nan=True)
+    assert np.allclose(lib.np.sem(y), stats.sem(y, axis=None, ddof=1), equal_nan=True)
+    assert np.allclose(lib.np.sem(y, axis=1), stats.sem(y, axis=1, ddof=1), equal_nan=True)
+    assert np.allclose(lib.np.sem(y, ddof=0), stats.sem(y, axis=None, ddof=0), equal_nan=True)
 
 def test_nansem(y):
     ynan = y.copy()
     y[~np.isfinite(y)] = np.nan
-    assert np.allclose(utils.np.nansem(y), np.array(stats.sem(ynan, axis=None, ddof=1, nan_policy='omit')), equal_nan=True)
-    assert np.allclose(utils.np.nansem(y, axis=1), np.array(stats.sem(ynan, axis=1, ddof=1, nan_policy='omit')), equal_nan=True)
-    assert np.allclose(utils.np.nansem(y, ddof=0), np.array(stats.sem(ynan, axis=None, ddof=0, nan_policy='omit')), equal_nan=True)
+    assert np.allclose(lib.np.nansem(y), np.array(stats.sem(ynan, axis=None, ddof=1, nan_policy='omit')), equal_nan=True)
+    assert np.allclose(lib.np.nansem(y, axis=1), np.array(stats.sem(ynan, axis=1, ddof=1, nan_policy='omit')), equal_nan=True)
+    assert np.allclose(lib.np.nansem(y, ddof=0), np.array(stats.sem(ynan, axis=None, ddof=0, nan_policy='omit')), equal_nan=True)
     
 def test_consistency():
     ymean = np.linspace(-5,5,num=10)
@@ -48,9 +48,9 @@ def test_consistency():
     ymean_ = ymean + np.zeros((1000000,10))
     yerr_ = yerr + np.zeros((1000000,10))
     y = np.random.normal(loc=ymean_, scale=yerr)
-    m1, s1 = utils.np.mean(y, axis=0), utils.np.sem(y, axis=0)
-    m2, s2 = utils.np.meanerr(y, yerr_, axis=0)
-    m3, s3 = utils.np.weightedmeanerr(y, yerr_, axis=0)
+    m1, s1 = lib.np.mean(y, axis=0), lib.np.sem(y, axis=0)
+    m2, s2 = lib.np.meanerr(y, yerr_, axis=0)
+    m3, s3 = lib.np.weightedmeanerr(y, yerr_, axis=0)
     rtol = 1.0e-2
     assert np.allclose(m1, m2) and np.allclose(m2, m3) and np.allclose(m1, m3) and np.allclose(m1, ymean, rtol=rtol)
     assert np.allclose(s1, s2, rtol=rtol) and np.allclose(s2, s3, rtol=rtol) and np.allclose(s1, s3, rtol=rtol)

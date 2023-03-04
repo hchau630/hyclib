@@ -78,6 +78,8 @@ def load_package_config(*args, **kwargs):
             config = load(default_config_file)
         
         logger.debug(f"Loaded default config file at {default_config_filename}.")
+    else:
+        config = {}
 
     user_config_filenames = [filename for filename in filenames['user_configs'] if filename.is_file()]
     for filename in reversed(user_config_filenames):
