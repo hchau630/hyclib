@@ -8,6 +8,7 @@ scipy
 
 # development requirements
 nbdime # for git merging notebooks
-twine
+build # for generating distribution package
+twine # for uploading package
 
 -e .
