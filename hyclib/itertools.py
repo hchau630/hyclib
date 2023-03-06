@@ -76,7 +76,10 @@ def dict_iter(d, delimiter='.'):
                     yield (delimiter.join([k, ki]), vi)
         
         else:
-            yield (k, v)
+            if delimiter is None:
+                yield ((k,), v)
+            else:
+                yield (k, v)
             
 def dict_get(d, k, delimiter='.'):
     if delimiter is None:
@@ -98,6 +101,15 @@ def dict_set(d, k, v, delimiter='.'):
     for ki in ks[:-1]:
         d = d.setdefault(ki, {})
     d[ks[-1]] = v
+    
+def dict_update(d, new_d):
+    for k, v in dict_iter(new_d, delimiter=None): # might get very slow if new_d is very large, but I can't think of a better way
+        dict_set(d, k, v, delimiter=None)
+        
+def dict_union(d, new_d):
+    d = d.copy()
+    dict_update(d, new_d)
+    return d
 
 def assign_dict(d, keys, value):
     """

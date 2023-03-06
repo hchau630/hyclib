@@ -87,3 +87,22 @@ def test_dict_zip(d1, d2, mode, fillvalue, expected):
 def test_dict_zip_exceptions(d1, d2, mode, expected):
     with expected:
         list(lib.itertools.dict_zip(d1, d2, mode=mode))
+
+def test_dict_union():
+    d = {
+        'options': {
+            'max_num_steps': 100,
+        }
+    }
+    new_d = {
+        'options': {
+            'dtype': 'float32',
+        }
+    }
+    expected = {
+        'options': {
+            'max_num_steps': 100,
+            'dtype': 'float32',
+        }
+    }
+    assert str(lib.itertools.dict_union(d, new_d)) == str(expected)

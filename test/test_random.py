@@ -10,12 +10,12 @@ def test_set_seed():
     b0 = np.random.random()
     c0 = torch.rand(1)
     
-    with lib.contextlib.set_seed(0):
+    with lib.random.set_seed(0):
         a1 = random.random()
         b1 = np.random.random()
         c1 = torch.rand(1)
 
-    with lib.contextlib.set_seed(1):
+    with lib.random.set_seed(1):
         a2 = random.random()
         b2 = np.random.random()
         c2 = torch.rand(1)
@@ -24,12 +24,12 @@ def test_set_seed():
     b3 = np.random.random()
     c3 = torch.rand(1)
     
-    with lib.contextlib.set_seed(0):
+    with lib.random.set_seed(0):
         a4 = random.random()
         b4 = np.random.random()
         c4 = torch.rand(1)
 
-    with lib.contextlib.set_seed(1):
+    with lib.random.set_seed(1):
         a5 = random.random()
         b5 = np.random.random()
         c5 = torch.rand(1)

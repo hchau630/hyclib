@@ -14,6 +14,9 @@ def basic_parser(**kwargs):
     }, **kwargs)
     return parser
 
+def get_logger(name=None):
+    return logging.getLogger(name)
+
 @contextlib.contextmanager
 def set_level(logger, level):
     current_level = logger.level

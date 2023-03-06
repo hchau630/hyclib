@@ -83,9 +83,7 @@ def load_package_config(*args, **kwargs):
 
     user_config_filenames = [filename for filename in filenames['user_configs'] if filename.is_file()]
     for filename in reversed(user_config_filenames):
-        new_config = load(filename)
-        for k, v in itertools.dict_iter(new_config, delimiter=None): # might get very slow if new_config is very large
-            itertools.dict_set(config, k, v, delimiter=None)
+        itertools.dict_update(config, load(filename))
 
     if len(user_config_filenames) > 0:
         logger.debug(f"Loaded user config files at the following locations from highest to lowest priority: {user_config_filenames}")
