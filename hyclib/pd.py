@@ -94,7 +94,7 @@ def digitize(x, column=None, colname=None, copy=True, new_cols=True, **kwargs):
         
     if isinstance(column, str):
         sample = revert_dtypes(x[column]).to_numpy()
-        bin_nums, centers, edges = stats.digitize(sample, **kwargs)
+        bin_nums, centers, edges = stats.bin(sample, nan_policy='omit', **kwargs)
         if new_cols:
             x[f'{column}_bin_center'] = centers[bin_nums]
             x[f'{column}_bin_ledge'] = np.array([-np.inf] + list(edges))[bin_nums]
@@ -103,7 +103,7 @@ def digitize(x, column=None, colname=None, copy=True, new_cols=True, **kwargs):
             x[column] = centers[bin_nums]
     else:
         sample = np.array([revert_dtypes(x[c]).to_numpy() for c in column]).T # (N,D)
-        bin_nums, centers, edges = stats.digitize_dd(sample, **kwargs)
+        bin_nums, centers, edges = stats.bin_dd(sample, nan_policy='omit', **kwargs)
         for b, c, e, col in zip(bin_nums, centers, edges, column):
             if new_cols:
                 x[f'{col}_bin_center'] = c[b]

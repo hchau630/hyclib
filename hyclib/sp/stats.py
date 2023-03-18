@@ -34,8 +34,8 @@ def _bin_edges(sample, bins=None, range=None):
     # Select range for each dimension
     # Used only if number of bins is given.
     if range is None:
-        smin = np.atleast_1d(np.array(sample.min(axis=0), float))
-        smax = np.atleast_1d(np.array(sample.max(axis=0), float))
+        smin = np.atleast_1d(np.array(np.nanmin(sample, axis=0), float))
+        smax = np.atleast_1d(np.array(np.nanmax(sample, axis=0), float))
     else:
         if len(range) != Ndim:
             raise ValueError(
@@ -75,7 +75,7 @@ def _bin_edges(sample, bins=None, range=None):
     return nbin, edges, dedges
 
 
-def _bin_numbers(sample, nbin, edges, dedges):
+def _bin_numbers(sample, nbin, edges, dedges, expand_binnumbers=False):
     """Compute the bin number each sample falls into, in each dimension
     """
     Dlen, Ndim = sample.shape
@@ -101,8 +101,11 @@ def _bin_numbers(sample, nbin, edges, dedges):
         # Shift these points one bin to the left.
         sampBin[i][on_edge] -= 1
 
-    # Compute the sample indices in the flattened statistic matrix.
-    binnumbers = np.ravel_multi_index(sampBin, nbin)
+    if expand_binnumbers:
+        binnumbers = np.stack(sampBin)
+    else:
+        # Compute the sample indices in the flattened statistic matrix.
+        binnumbers = np.ravel_multi_index(sampBin, nbin)
 
     return binnumbers
 
@@ -135,7 +138,10 @@ def _calc_binned_statistic(Vdim, bin_numbers, result, values, stat_func, values_
 
 def binned_statistic_dd(sample, values, values_err=None, statistic='mean',
                         bins=10, range=None, expand_binnumbers=False,
-                        binned_statistic_result=None):
+                        binned_statistic_result=None, nan_policy='raise'):
+    if nan_policy not in ['raise', 'omit']:
+        raise ValueError(f"nan_policy must be 'raise' or 'omit', but {nan_policy=}.")
+    
     known_stats = ['mean', 'median', 'count', 'sum', 'std', 'min', 'max']
     if not callable(statistic) and statistic not in known_stats:
         raise ValueError('invalid statistic %r' % (statistic,))
@@ -148,7 +154,7 @@ def binned_statistic_dd(sample, values, values_err=None, statistic='mean',
     # If bins was an integer-like object, now it is an actual Python int.
 
     # NOTE: for _bin_edges(), see e.g. gh-11365
-    if isinstance(bins, int) and not np.isfinite(sample).all():
+    if nan_policy == 'raise' and not np.isfinite(sample).all():
         raise ValueError('%r contains non-finite values.' % (sample,))
 
     # `Ndim` is the number of dimensions (e.g. `2` for `binned_statistic_2d`)
@@ -300,7 +306,20 @@ def binned_statistic_dd(sample, values, values_err=None, statistic='mean',
     return BinnedStatisticddResult(result, edges, binnumbers)
 
 
-def digitize_dd(sample, bins=10, range=None, expand_binnumbers=True):
+def bin_dd(sample, bins=10, range=None, expand_binnumbers=True, nan_policy='raise'):
+    """
+    Bins N-dimensional data. Arguments have the same meaning as in scipy.stats.binned_statistic_dd,
+    except that here expand_binnumbers=True by default, and that if expand_binnumbers=True and N = 1,
+    then binnumbers is 2D instead of 1D as in scipy.stats.binned_statistic_dd.
+    nan_policy can be 'raise' or 'omit'. 
+    If nan_policy='raise', then ValueError is raised if sample contains any NaNs (this is slightly different
+    from the default behavior of scipy.stats.binned_statistic_dd).
+    If nan_policy='omit', NaNs are sorted into the rightmost bin.
+    """
+    
+    if nan_policy not in ['raise', 'omit']:
+        raise ValueError(f"nan_policy must be 'raise' or 'omit', but {nan_policy=}.")
+    
     try:
         bins = index(bins)
     except TypeError:
@@ -309,7 +328,7 @@ def digitize_dd(sample, bins=10, range=None, expand_binnumbers=True):
     # If bins was an integer-like object, now it is an actual Python int.
 
     # NOTE: for _bin_edges(), see e.g. gh-11365
-    if isinstance(bins, int) and not np.isfinite(sample).all():
+    if nan_policy == 'raise' and not np.isfinite(sample).all():
         raise ValueError('%r contains non-finite values.' % (sample,))
 
     # `Ndim` is the number of dimensions (e.g. `2` for `binned_statistic_2d`)
@@ -332,16 +351,12 @@ def digitize_dd(sample, bins=10, range=None, expand_binnumbers=True):
         bins = Ndim * [bins]
         
     nbin, edges, dedges = _bin_edges(sample, bins, range)
-    binnumbers = _bin_numbers(sample, nbin, edges, dedges)
-    
-    # Unravel binnumbers into an ndarray, each row the bins for each dimension
-    if expand_binnumbers and Ndim > 1:
-        binnumbers = np.asarray(np.unravel_index(binnumbers, nbin))
+    binnumbers = _bin_numbers(sample, nbin, edges, dedges, expand_binnumbers=expand_binnumbers)
         
     centers = [np.array([np.nan] + list(0.5*(e[:-1]+e[1:])) + [np.nan]) for e in edges]
     return binnumbers, centers, edges
 
-def digitize(sample, bins=10, range=None):
+def bin(sample, bins=10, range=None, nan_policy='raise'):
     try:
         N = len(bins)
     except TypeError:
@@ -354,8 +369,8 @@ def digitize(sample, bins=10, range=None):
         if len(range) == 2:
             range = [range]
             
-    bin_nums, centers, edges = digitize_dd(sample, bins=bins, range=range)
-    return bin_nums, centers[0], edges[0]
+    bin_nums, centers, edges = bin_dd(sample, bins=bins, range=range, nan_policy=nan_policy)
+    return bin_nums[0], centers[0], edges[0]
 
 def binned_mean_dd(x, y, yerr=None, weighted=False, nanstats=True, **kwargs):
     nan = 'nan' if nanstats else ''
