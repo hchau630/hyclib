@@ -41,7 +41,7 @@ def test_nan_stats(x, dim, func_name):
         result = result.values
         expected = torch.from_numpy(expected)
         torch.testing.assert_close(result, expected)
-
+        
 @pytest.mark.parametrize('D, bins', [
     (1, 100),
     (2, 10),
