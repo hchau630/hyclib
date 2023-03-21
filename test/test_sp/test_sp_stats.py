@@ -93,5 +93,3 @@ def test_bin(bins, nan_policy, expectation):
         np.testing.assert_allclose(binnumbers[nan_indices], len(edges)) # check that nan samples are sorted into rightmost bin
         np.testing.assert_allclose(binnumbers[arr < np.min(edges)], 0) # check that samples less than leftmost edge are sorted into leftmost bin
         np.testing.assert_allclose(binnumbers[arr > np.max(edges)], len(edges)) # check that samples less than leftmost edge are sorted into leftmost bin
-        
-        

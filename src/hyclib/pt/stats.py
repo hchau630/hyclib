@@ -4,6 +4,12 @@ import builtins
 import torch
 import numpy as np
 
+__all__ = [
+    'nanmax',
+    'nanmin',
+    'bincount',
+]
+
 def nanmax(t, dim=None):
     t = t.nan_to_num(nan=-torch.inf, posinf=torch.inf, neginf=-torch.inf)
     if dim is None:
@@ -15,6 +21,61 @@ def nanmin(t, dim=None):
     if dim is None:
         return t.min()
     return t.min(dim=dim)
+
+def _bincount(indices, weights=None, minlength=0):
+    if indices.is_floating_point():
+        raise TypeError(f"indices must be a tensor of integer dtype, but {indices.dtype=}.")
+    if indices.min() < 0:
+        raise ValueError(f"indices must not be negative, but {indices.min()=}.")
+    if indices.ndim != 1:
+        raise ValueError(f"indices must be 1D, but {indices.ndim=}.")
+        
+    if weights is None:
+        weights = torch.ones(indices.shape, dtype=torch.long, device=indices.device)
+    else:
+        if not indices.device == weights.device:
+            raise ValueError(f"indices and weights must be on the same device, but {indices.device=} and {weights.device=}.")
+        indices = indices.broadcast_to(weights.shape)
+        
+    shape = (*weights.shape[:-1], max(indices.max().item()+1, minlength))
+        
+    t = torch.zeros(shape, dtype=weights.dtype, device=weights.device)
+    t.scatter_add_(-1, indices, weights)
+    
+    return t
+
+def bincount(x, weights=None, minlength=0, nan_policy='propagate'):
+    """
+    Similar to torch.bincount, but supports auto-differentiation and allows batched weights.
+    Always performs bincount on the last dimension, with the leading dimensions interpreted as batch dimensions.
+    
+    Benchmark:
+    
+    N, M = 100000, 100
+    a = torch.randint(M, size=(N,))
+    w = torch.normal(mean=0.0, std=1.0, size=(N,))
+    a_np, w_np = a.numpy(), w.numpy()
+
+    %timeit lib.pt.bincount(a, weights=w)
+    116 µs ± 377 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+    
+    %timeit a.bincount(weights=w)
+    93.5 µs ± 187 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+    
+    %timeit np.bincount(a_np, weights=w_np)
+    161 µs ± 727 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+    """
+    if nan_policy == 'propagate' or weights is None:
+        return _bincount(x, weights=weights, minlength=minlength)
+    
+    if nan_policy == 'omit':
+        mask = weights.isnan()
+        minlength = max(x.max().item() + 1, minlength)
+        x = x[~mask]
+        weights = weights[~mask]
+        return _bincount(x, weights=weights, minlength=minlength)
+    
+    raise ValueError(f"nan_policy must be 'propagate' or 'omit', but {nan_policy=}.")
 
 def _bin_edges(sample, bins=None, range=None):
     """ 
@@ -59,9 +120,9 @@ def _bin_edges(sample, bins=None, range=None):
         bins_i = torch.as_tensor(bins[i])
         if bins_i.ndim == 0: # scalar, interpret as number of bins
             edges[i] = torch.linspace(smin[i], smax[i], bins_i.item() + 1,
-                                      dtype=edges_dtype, device=device)
+                                      dtype=edges_dtype).to(device) # compute on cpu first since MPS seems to have precision issue
         else:
-            edges[i] = torch.as_tensor(bins_i, dtype=edges_dtype, device=device)
+            edges[i] = torch.as_tensor(bins_i, dtype=edges_dtype).to(device)
         dedges[i] = torch.diff(edges[i])
 
     return edges, dedges

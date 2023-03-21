@@ -101,3 +101,59 @@ def test_bin(bins, nan_policy, expectation):
         torch.testing.assert_close(torch.from_numpy(binnumbers), tbinnumbers)
         torch.testing.assert_close(torch.from_numpy(centers), tcenters, equal_nan=True)
         torch.testing.assert_close(torch.from_numpy(edges), tedges)
+
+def test_bin_precision():
+    """
+    Previous there was a precision issue with torch.linspace(..., device='mps') that causes the rightmost point
+    to be classified outside of the max bin instead of in the max bin.
+    """
+    for _ in range(500):
+        t = torch.normal(mean=0, std=1, size=(10,), device='mps')
+        out_1 = lib.pt.stats.bin(t.cpu(), bins=3)[0]
+        out_2 = lib.pt.stats.bin(t, bins=3)[0].cpu()
+        out_3 = lib.sp.stats.bin(t.cpu().numpy(), bins=3)[0]
+        assert (out_1 == out_2.cpu()).all() and (out_1.numpy() == out_3).all()
+
+@pytest.mark.parametrize('w', [
+    torch.tensor([[ 0.6455,  torch.nan, -0.9379, -0.0359, -0.1765, -0.3408, -1.9616,  0.1720,
+                    0.4691, -0.5099],
+                  [ 1.2700,  0.1971, -0.8720, -0.6560,  1.4493,  0.3326, -0.9554,  0.7140,
+                   -1.5305, -1.1244]], requires_grad=True),
+    torch.tensor([[ 0.6455,  torch.nan, -0.9379, -0.0359, -0.1765, -0.3408, -1.9616,  0.1720,
+                    0.4691, -0.5099],
+                  [ 1.2700,  0.1971, -0.8720, -0.6560,  1.4493,  0.3326, -0.9554,  0.7140,
+                   -1.5305, -1.1244]]),
+    torch.tensor([ 0.6455,  torch.nan, -0.9379, -0.0359, -0.1765, -0.3408, -1.9616,  0.1720,
+                   0.4691, -0.5099]),
+])
+@pytest.mark.parametrize('minlength', [0, 10, 15])
+def test_bincount(w, minlength):
+    a = torch.tensor([0,0,1,1,1,0,2,1,2,0])
+    t = lib.pt.bincount(a, weights=w, minlength=minlength)
+    
+    if w.ndim == 2:
+        arr = []
+        for wi in w:
+            arr.append(np.bincount(a.numpy(), weights=wi.detach().numpy(), minlength=minlength))
+        arr = np.stack(arr)
+    elif w.ndim == 1:
+        arr = np.bincount(a.numpy(), weights=w.detach().numpy(), minlength=minlength)
+    else:
+        raise RuntimeError()
+    
+    assert np.allclose(t.detach().numpy(), arr, equal_nan=True)
+    
+def test_bincount_nan_policy():
+    x = torch.tensor([1,3,5,4,3,2,4,5,3])
+    weights = torch.tensor([1.5,2.5,np.nan,0.5,-1.0,np.nan,0.5,np.nan,np.nan])
+    
+    torch.testing.assert_close(
+        lib.pt.bincount(x, weights=weights, nan_policy='omit'),
+        torch.tensor([0.0, 1.5, 0.0, 1.5, 1.0, 0.0]),
+    )
+    torch.testing.assert_close(
+        lib.pt.bincount(x, weights=weights, nan_policy='propagate'),
+        torch.tensor([0.0, 1.5, np.nan, np.nan, 1.0, np.nan]),
+        equal_nan=True,
+    )
+    

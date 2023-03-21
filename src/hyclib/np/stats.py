@@ -21,6 +21,7 @@ __all__ = [
     'nanmeanerr',
     'weightedmeanerr',
     'nanweightedmeanerr',
+    'bincount',
 ]
 
 mean = np.mean
@@ -129,4 +130,16 @@ def nanweightedmeanerr(y, yerr, axis=None):
     yerr = 1/np.nansum(1/yerr**2, axis=axis)**0.5 # eq 4.19 with square root
     
     return y, yerr
+
+def bincount(x, weights=None, minlength=0, nan_policy='propagate'):
+    if nan_policy == 'propagate' or weights is None:
+        return np.bincount(x, weights=weights, minlength=minlength)
     
+    if nan_policy == 'omit':
+        mask = np.isnan(weights)
+        minlength = max(x.max() + 1, minlength)
+        x = x[~mask]
+        weights = weights[~mask]
+        return np.bincount(x, weights=weights, minlength=minlength)
+    
+    raise ValueError(f"nan_policy must be 'propagate' or 'omit', but {nan_policy=}.")

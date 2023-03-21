@@ -54,3 +54,17 @@ def test_consistency():
     rtol = 1.0e-2
     assert np.allclose(m1, m2) and np.allclose(m2, m3) and np.allclose(m1, m3) and np.allclose(m1, ymean, rtol=rtol)
     assert np.allclose(s1, s2, rtol=rtol) and np.allclose(s2, s3, rtol=rtol) and np.allclose(s1, s3, rtol=rtol)
+    
+def test_bincount():
+    x = np.array([1,3,5,4,3,2,4,5,3])
+    weights = np.array([1.5,2.5,np.nan,0.5,-1.0,np.nan,0.5,np.nan,np.nan])
+    
+    np.testing.assert_allclose(
+        lib.np.bincount(x, weights=weights, nan_policy='omit'),
+        np.array([0.0, 1.5, 0.0, 1.5, 1.0, 0.0]),
+    )
+    np.testing.assert_allclose(
+        lib.np.bincount(x, weights=weights, nan_policy='propagate'),
+        np.array([0.0, 1.5, np.nan, np.nan, 1.0, np.nan]),
+        equal_nan=True,
+    )

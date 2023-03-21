@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hyclib"
-version = "0.1.4"
+version = "0.1.8"
 description = "Commonly used tools across my own personal projects."
 readme = "README.md"
 requires-python = ">=3.9" # package developed with python v3.9.16
@@ -34,6 +34,3 @@ dependencies = [
 
 [project.urls]
 repository = "https://github.com/hchau630/hyclib"
-
-[tool.setuptools]
-packages = ["hyclib"]
