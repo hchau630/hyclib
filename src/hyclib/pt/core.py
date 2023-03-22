@@ -104,7 +104,10 @@ def unique(x, dim=None, sorted=True, return_index=False, return_inverse=False, r
     # separate rows with nans from rows without nans and only compute unique on rows without nans.
     # This avoids torch.unique bug when dim is not None and input has nan.
     isnan = x.isnan().any(dim=1)
-    x_not_isnan, x_isnan = x[~isnan], x[isnan]
+    if not isnan.any():
+        x_not_isnan, x_isnan = x, torch.empty((0, x.shape[1]), dtype=x.dtype, device=x.device) # slighty optimization to prevent large copy
+    else:
+        x_not_isnan, x_isnan = x[~isnan], x[isnan]
     N_not_isnan = len(x_not_isnan)
 
     if return_index:
