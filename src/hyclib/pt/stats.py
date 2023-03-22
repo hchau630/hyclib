@@ -23,6 +23,13 @@ def nanmin(t, dim=None):
     return t.min(dim=dim)
 
 def _bincount(indices, weights=None, minlength=0):
+    if weights is None or (not weights.requires_grad and indices.shape == weights.shape):
+        # only need the custom implementation of bincount if we have weights and 
+        # either weights has gradient or weights has a batch dimension.
+        # the pytorch implementation of bincount is much faster when weights is None for very
+        # big inputs since it does not need to create the weights tensor
+        return torch.bincount(indices, weights=weights, minlength=minlength)
+    
     if indices.is_floating_point():
         raise TypeError(f"indices must be a tensor of integer dtype, but {indices.dtype=}.")
     if indices.min() < 0:

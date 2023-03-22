@@ -1,8 +1,7 @@
-torch==2.0.0
-
 # notebook requirements
 seaborn
 ipympl
+ipykernel
 line_profiler[ipython]
 
 # testing requirements

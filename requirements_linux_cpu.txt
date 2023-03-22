@@ -1,6 +1,8 @@
 # notebook requirements
 seaborn
 ipympl
+ipykernel
+line_profiler[ipython]
 
 # testing requirements
 pytest
