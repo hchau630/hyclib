@@ -1,11 +1,12 @@
 import collections
+import contextlib
 
 import torch
 import numpy as np
 
 from ..itertools import flatten_seq
 
-__all__ = ['inv_perm', 'lexsort', 'unique', 'meshgrid_dd']
+__all__ = ['inv_perm', 'lexsort', 'unique', 'meshgrid_dd', 'use_deterministic_algorithms']
 
 def inv_perm(x):
     x_inv = torch.empty_like(x)
@@ -27,7 +28,7 @@ def lexsort(keys, dim=-1):
     
     return idx
 
-def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return_counts=False):
+def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return_counts=False, first_index=True):
     if dim is None:
         x = x.reshape(-1)
         dim = 0
@@ -50,10 +51,31 @@ def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return
             out['inverse'] = inverse
         if return_counts:
             out['counts'] = counts
+
+#         ret = torch.unique_consecutive(x, dim=0, return_inverse=True, return_counts=return_counts)
+
+#         x, inverse = ret[0], ret[1]
+#         args = (len(inverse)-1, -1, -1) if first_index else (len(inverse),)
+#         with use_deterministic_algorithms() if first_index else contextlib.nullcontext():
+#             # scatter_ is non-deterministic by default and would result in a random index rather than the first index
+#             index = inverse.new_empty(len(x)).scatter_(
+#                 0,
+#                 inverse.flip(0) if first_index else inverse,
+#                 torch.arange(*args, dtype=inverse.dtype, device=inverse.device),
+#             )
+        
+#         # gather results into a dictionary
+#         out = {'x': x, 'index': index}
+#         if return_inverse:
+#             out['inverse'] = inverse
+#         if return_counts:
+#             out['counts'] = ret[2]
+
     else:
         ret = torch.unique_consecutive(x, dim=0, return_inverse=return_inverse, return_counts=return_counts)
+
+        # gather results into a dictionary
         ret = list(ret) if isinstance(ret, tuple) else [ret]
-        
         out = {'x': ret.pop(0)}
         if return_inverse:
             out['inverse'] = ret.pop(0)
@@ -73,12 +95,14 @@ def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return
         return out['x']
     return tuple(out.values())
 
-def unique(x, dim=None, sorted=True, return_index=False, return_inverse=False, return_counts=False, equal_nan=False):
+def unique(x, dim=None, sorted=True, return_index=False, return_inverse=False, return_counts=False, equal_nan=False, first_index=True):
     """
     Note:
      - When sorted=False, there is no guarantee on what the result order will be.
      - The result of this function when sorted=True, return_index=False is slightly different from numpy
      with return_index=False since numpy does not use stable sort when return_index=False, only when return_index=True.
+     - If return_index=True and first_index=True, the returned index is the first index of the unique element. Otherwise,
+        the returned index can correspond to any index of the unique element, and the behavior is non-deterministic.
     """
     
     if equal_nan:
@@ -111,28 +135,49 @@ def unique(x, dim=None, sorted=True, return_index=False, return_inverse=False, r
     N_not_isnan = len(x_not_isnan)
 
     if return_index:
-        # code copied from https://github.com/pytorch/pytorch/issues/36748#issuecomment-1474368922
-        x_not_isnan, inverse, counts = torch.unique(x_not_isnan, dim=0, return_inverse=True, return_counts=True)
-        inv_sort_idx = inverse.argsort(stable=True)
-        tot_counts = torch.cat((counts.new_zeros(1), counts.cumsum(dim=0)))[:-1]
-        index = inv_sort_idx[tot_counts]
-        
+        # # code copied from https://github.com/pytorch/pytorch/issues/36748#issuecomment-1474368922
+        # x_not_isnan, inverse, counts = torch.unique(x_not_isnan, dim=0, return_inverse=True, return_counts=True)
+        # inv_sort_idx = inverse.argsort(stable=True)
+        # tot_counts = torch.cat((counts.new_zeros(1), counts.cumsum(dim=0)))[:-1]
+        # index = inv_sort_idx[tot_counts]
+
+        # out = {'x': x_not_isnan, 'index': index}
+        # if return_inverse:
+        #     out['inverse'] = inverse
+        # if return_counts:
+        #     out['counts'] = counts
+
+        ret = torch.unique(x_not_isnan, dim=0, return_inverse=True, return_counts=return_counts)
+
+        x_not_isnan, inverse = ret[0], ret[1]
+        args = (len(inverse)-1, -1, -1) if first_index else (len(inverse),)
+        with use_deterministic_algorithms() if first_index else contextlib.nullcontext():
+            # scatter_ is non-deterministic by default and would result in a random index rather than the first index
+            index = inverse.new_empty(len(x_not_isnan)).scatter_(
+                0,
+                inverse.flip(0) if first_index else inverse,
+                torch.arange(*args, dtype=inverse.dtype, device=inverse.device),
+            )
+
+        # gather results into a dictionary
         out = {'x': x_not_isnan, 'index': index}
         if return_inverse:
             out['inverse'] = inverse
         if return_counts:
-            out['counts'] = counts
-            
+            out['counts'] = ret[2]
+
     else:
         ret = torch.unique(x_not_isnan, dim=0, return_inverse=return_inverse, return_counts=return_counts)
+    
+        # gather results into a dictionary
         ret = list(ret) if isinstance(ret, tuple) else [ret]
-        
         out = {'x': ret.pop(0)}
         if return_inverse:
             out['inverse'] = ret.pop(0)
         if return_counts:
             out['counts'] = ret.pop(0)
         
+    # append nans to the end of the unique tensor and handle index, inverse, and counts accordingly
     N_unique_not_isnan = len(out['x'])
     out['x'] = torch.cat([out['x'], x_isnan])
     if return_index:
@@ -165,6 +210,8 @@ def meshgrid_dd(tensors):
     (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_2),
     ...
     (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_P)
+    
+    IMPORTANT: Data is NOT copied just like pytorch, but unlike numpy which copies by default.
     """
     sizes = [list(tensor.shape[:-1]) for tensor in tensors] # [[n_1,...,n_{M_1}],[n_1,...,.n_{M_2}],...]
     Ms = np.array([tensor.ndim - 1 for tensor in tensors]) # [M_1, M_2, ...]
@@ -174,6 +221,18 @@ def meshgrid_dd(tensors):
     shapes = [[1]*M_befores[i]+sizes[i]+[1]*M_afters[i]+[Ns[i]] for i, tensor in enumerate(tensors)]
     expanded_tensors = [tensor.reshape(shapes[i]).expand(flatten_seq(sizes)+[Ns[i]]) for i, tensor in enumerate(tensors)]
     return expanded_tensors
+
+@contextlib.contextmanager
+def use_deterministic_algorithms():
+    """
+    Context manager to use deterministic algorithms.
+    """
+    is_deterministic = torch.are_deterministic_algorithms_enabled()
+    try:
+        torch.use_deterministic_algorithms(True)
+        yield
+    finally:
+        torch.use_deterministic_algorithms(is_deterministic)
 
 ##########################################
 ### Implemented but untested functions ###

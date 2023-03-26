@@ -58,8 +58,9 @@ def test_lexsort(M, D, shape, O, dim, device):
 @pytest.mark.parametrize('return_inverse', [True, False])
 @pytest.mark.parametrize('return_counts', [True, False])
 @pytest.mark.parametrize('sorted', [True, False])
+@pytest.mark.parametrize('first_index', [True, False])
 @pytest.mark.parametrize('device', get_devices())
-def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_counts, device):
+def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_counts, first_index, device):
     kwargs = {
         'return_index': return_index,
         'return_inverse': return_inverse,
@@ -76,7 +77,7 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
     t = t.to(device)
     a = t.cpu().numpy()
 
-    torch_results = [t for t in as_tuple(lib.pt.unique(t, dim=dim, sorted=sorted, **kwargs))]
+    torch_results = [out_i for out_i in as_tuple(lib.pt.unique(t, dim=dim, sorted=sorted, first_index=first_index, **kwargs))]
     np_results = as_tuple(np.unique(t.cpu().numpy(), axis=dim, equal_nan=False, **np_kwargs))
     if not kwargs['return_index']:
         np_results = list(np_results)
@@ -92,6 +93,13 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
     keys = ['x'] + [k for k, v in kwargs.items() if v]
 
     for key, torch_result, np_result in zip(keys, torch_results, np_results):
+        if not first_index and key == 'return_index':
+            if dim is None:
+                torch.testing.assert_close(torch_results[0], t.reshape(-1)[torch_result], equal_nan=True)
+            else:
+                torch.testing.assert_close(torch_results[0], t.index_select(dim, torch_result), equal_nan=True)
+            continue # no need to check against numpy since the indices are not guaranteed to be the same due to non-determinism
+
         if sorted:
             torch.testing.assert_close(torch_result, torch.from_numpy(np_result).to(device), equal_nan=True)
         else:

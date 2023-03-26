@@ -38,6 +38,8 @@ def meshgrid_dd(*arrs):
     (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_2),
     ...
     (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_P)
+    
+    IMPORTANT: Data is NOT copied, unlike numpy which copies by default
     """
     sizes = [list(arr.shape[:-1]) for arr in arrs] # [[n_1,...,n_{M_1}],[n_1,...,.n_{M_2}],...]
     Ms = np.array([arr.ndim - 1 for arr in arrs]) # [M_1, M_2, ...]
@@ -59,6 +61,7 @@ def meshgrid(*arrs, **kwargs):
     (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P})
     
     IMPORTANT: By default, indexing='ij' rather than 'xy' as in np.meshgrid. This follows the pytorch convention.
+    IMPORTANT: Data is NOT copied, unlike numpy which copies by default
     """
     default_kwargs = {
         'indexing': 'ij',

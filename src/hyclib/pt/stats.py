@@ -36,16 +36,12 @@ def _bincount(indices, weights=None, minlength=0):
         raise ValueError(f"indices must not be negative, but {indices.min()=}.")
     if indices.ndim != 1:
         raise ValueError(f"indices must be 1D, but {indices.ndim=}.")
-        
-    if weights is None:
-        weights = torch.ones(indices.shape, dtype=torch.long, device=indices.device)
-    else:
-        if not indices.device == weights.device:
-            raise ValueError(f"indices and weights must be on the same device, but {indices.device=} and {weights.device=}.")
-        indices = indices.broadcast_to(weights.shape)
-        
+    if not indices.device == weights.device:
+        raise ValueError(f"indices and weights must be on the same device, but {indices.device=} and {weights.device=}.")
+
     shape = (*weights.shape[:-1], max(indices.max().item()+1, minlength))
-        
+    
+    indices = indices.broadcast_to(weights.shape)
     t = torch.zeros(shape, dtype=weights.dtype, device=weights.device)
     t.scatter_add_(-1, indices, weights)
     

@@ -1,6 +1,8 @@
 import functools
 import warnings
 
+from . import pprint
+
 def parametrized(dec):
     """
     A decorator for decorators.
@@ -8,7 +10,6 @@ def parametrized(dec):
     """
     def layer(*args, **kwargs):
         def repl(f):
-            print(f, *args, **kwargs)
             return dec(f, *args, **kwargs)
         return repl
     return layer
