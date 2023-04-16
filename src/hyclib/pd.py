@@ -1,5 +1,6 @@
 import functools
 import logging
+from datetime import datetime
 
 import numpy as np
 import numpy.ma as ma
@@ -11,9 +12,11 @@ from .sp import stats
 
 logger = logging.getLogger(__name__)
 
-def _formatter(x, float_format=None, verbose=False):
+def _formatter(x, float_format=None, datetime_format=None, verbose=False):
     if float_format is None:
         float_format = '{:.4f}'.format
+    if datetime_format is None:
+        datetime_format = '{:%Y-%m-%d %H:%M:%S}'.format
         
     if isinstance(x, np.ndarray):
         if x.ndim == 0:
@@ -50,13 +53,15 @@ def _formatter(x, float_format=None, verbose=False):
         return f"dict ({len(x)})"
     if isinstance(x, np.inexact):
         return float_format(x)
+    if isinstance(x, datetime):
+        return datetime_format(x)
     return str(x)
 
-def display(df, float_format=None, verbose=False, **kwargs):
+def display(df, float_format=None, datetime_format=None, verbose=False, **kwargs):
     default_kwargs = {
         'max_rows': 6,
         'show_dimensions': True,
-        'formatters': {k: functools.partial(_formatter, float_format=float_format, verbose=verbose) for k in df.columns},
+        'formatters': {k: functools.partial(_formatter, float_format=float_format, datetime_format=datetime_format, verbose=verbose) for k in df.columns},
     }
     default_kwargs.update(kwargs)
 

@@ -1,4 +1,4 @@
-def pformat(d, indent=0, spaces=4, verbose=False):
+def pformat(d, indent=0, spaces=4, verbose=True):
     output = ''
     for key, value in d.items():
         output += f"{' ' * spaces * indent}'{str(key)}':\n"

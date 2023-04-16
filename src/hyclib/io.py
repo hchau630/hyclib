@@ -15,7 +15,7 @@ import mat73
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from . import itertools, exceptions
+from .core import itertools, exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -218,66 +218,6 @@ def from_hdf(filename, callback=None, progress=True, **kwargs):
                 itertools.dict_set(d, k, v, delimiter='/')
     
     return d
-                
-            
-# def from_hdf(filename, groupname='', callback=None, progress=True):
-#     """
-#     Recursive iterator of an hdf5 file
-    
-#     callback is a function with signature (rel_path, abs_path, obj, logger) -> None or (k, v)
-#         - obj can be PData, h5py.Dataset, or other primitive types.
-#         - If v is pd.HDFStore, d[k] = v[abs_path]. If v is h5py.Dataset, d[k] = v[...]. Otherwise, d[k] = v.
-#         - To override this behavior, implement your custom behavior and then raise ItemProcessed exception.
-#     """
-#     groupname = pathlib.Path('/') / groupname
-    
-#     if callback is None:
-#         callback = lambda d, k, v, logger: None
-        
-#     def set_item(d, k, v):
-#         try:
-#             out = callback(d, k, v, logger)
-#         except ItemProcessed:
-#             pass
-#         else:
-#             k, v = (k, v) if out is None else out
-#             v = load_hdf5_obj(v)
-#             itertools.dict_set(d, k, v, delimiter='/')
-
-#     d = {}
-    
-#     pd_paths = []
-#     with pd.HDFStore(filename, 'r') as f, logging_redirect_tqdm():
-#         for k in tqdm(f.keys(), disable=(not progress)):
-#             k = pathlib.Path(k)
-#             if k.is_relative_to(groupname):
-#                 path = k.relative_to(groupname)
-#                 pd_paths.append(path)
-#                 set_item(d, str(path), PData(hdfstore, str(k)))
-        
-#     with h5py.File(filename, 'r') as f, logging_redirect_tqdm():
-#         group = f[str(groupname)]
-        
-#         counter = Counter() # could also be done using nonlocal
-#         group.visit(counter)
-        
-#         with tqdm(total=counter.count+1, disable=(not progress)) as pbar:
-#             def func(path, obj):
-#                 path = pathlib.Path(path)
-#                 if any(path.is_relative_to(p) for p in pd_paths):
-#                     pass
-#                 elif isinstance(obj, h5py.Group):
-#                     for attr_name, attr in obj.attrs.items():
-#                         set_item(d, str(path / attr_name), attr)
-#                 else:
-#                     set_item(d, str(path), obj) # obj is a dataset
-                    
-#                 pbar.update()
-                
-#             func('', group)
-#             group.visititems(func)
-    
-#     return d
 
 def save(path, data, extension=None, depth=-1, overwrite=False):
     """

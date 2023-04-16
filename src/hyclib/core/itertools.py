@@ -1,7 +1,5 @@
 import itertools
 
-import numpy as np
-
 def flatten_seq(s, depth=-1, dtypes=[list, tuple]):
     """
     Recursively flattens a sequence (defined as an instance
@@ -134,7 +132,7 @@ def product(*ls, enum=False):
     """
     if not enum:
         return itertools.product(*ls)
-    return zip(np.ndindex(tuple(len(l) for l in ls)), itertools.product(*ls))
+    return zip(itertools.product(*[range(len(l)) for l in ls]), itertools.product(*ls))
     
 def dict_zip(*dicts, mode='strict', **kwargs):
     if mode == 'strict':

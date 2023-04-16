@@ -4,7 +4,7 @@ import contextlib
 import torch
 import numpy as np
 
-from ..itertools import flatten_seq
+from ..core.itertools import flatten_seq
 
 __all__ = ['inv_perm', 'lexsort', 'unique', 'meshgrid_dd', 'use_deterministic_algorithms']
 
@@ -52,6 +52,7 @@ def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return
         if return_counts:
             out['counts'] = counts
 
+        # the following code doesn't work right now on MPS due to MPS determinism bug
 #         ret = torch.unique_consecutive(x, dim=0, return_inverse=True, return_counts=return_counts)
 
 #         x, inverse = ret[0], ret[1]

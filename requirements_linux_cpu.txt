@@ -14,4 +14,4 @@ build # for generating distribution package
 twine # for uploading package
 
 --extra-index-url https://download.pytorch.org/whl/cpu  # cpu only install of pytorch
--e .
+-e .[numerics, numerics-gpu, plotting, analytics]

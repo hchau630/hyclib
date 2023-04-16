@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..itertools import flatten_seq
+from ..core.itertools import flatten_seq
 
 __all__ = [
     'isconst',

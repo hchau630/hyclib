@@ -19,17 +19,34 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
+    'tomli',
+    'platformdirs',
+]
+
+[project.optional-dependencies]
+numerics = [
+    'numpy',
+    'scipy',
+]
+ml = [
+    'numpy',
+    'scipy',
+    'torch',
+]
+viz = [
     'numpy',
     'matplotlib',
     'statsmodels',
+]
+data = [
+    'numpy',
+    'scipy',
     'torch',
-    'tomli',
-    'h5py',
     'pandas',
     'tables', # optional dependency for pandas that is needed here
-    'tqdm',
+    'h5py',
     'mat73',
-    'platformdirs',
+    'tqdm',
 ]
 
 [project.urls]

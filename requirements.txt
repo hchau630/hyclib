@@ -13,4 +13,4 @@ nbdime # for git merging notebooks
 build # for generating distribution package
 twine # for uploading package
 
--e .
+-e .[numerics,ml,viz,data]

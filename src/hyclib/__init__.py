@@ -1,23 +1,36 @@
-from . import (
-    np,
-    sp,
-    pd,
-    bpd,
-    npf,
-    exceptions,
-    io,
-    itertools,
-    configurable,
+from .core import (
     pprint,
-    plot,
     config,
+    exceptions,
     argparse,
     logging,
-    random,
     warnings,
-    functools,
-    clstools,
     timeit,
+    clstools,
+    functools,
+    itertools,
+    configurable,
+    random,
 )
+    
+import importlib
+
+modules = [
+    '.np',
+    '.pt',
+    '.sp',
+    '.io',
+    '.npf',
+    '.pd',
+    '.plot',
+]
+
+for module in modules:
+    try:
+        importlib.import_module(module, package='hyclib')
+    except ImportError as err:
+        pass
+    
+del importlib, modules, module
 
 cfg = config.load_package_config('hyclib')
