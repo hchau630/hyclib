@@ -1,7 +1,7 @@
 import torch
 
 import hyclib as lib
-import hyclib.configurable as conf
+import hyclib.core.configurable as conf
 
 class SubModule(conf.Configurable, torch.nn.Module):
     def __init__(self, a):
