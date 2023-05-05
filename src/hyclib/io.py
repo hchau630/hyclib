@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 
 ILLEGAL_KEYS = ['CLASS', 'PYTABLES_FORMAT_VERSION', 'TITLE', 'VERSION']
 
-def loadmat(filename):
+def loadmat(filename, simplify_cells=True, **kwargs):
     try:
-        data = sio.loadmat(filename, simplify_cells=True)
+        data = sio.loadmat(filename, simplify_cells=simplify_cells, **kwargs)
     except NotImplementedError as err:
         data = mat73.loadmat(filename)
     return data

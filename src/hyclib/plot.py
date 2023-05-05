@@ -258,3 +258,100 @@ def set_aspect(option, ax=None):
         
     else:
         ax.set_aspect(option)
+        
+def plot_matlab_fig(filename, size=(4, 3)):
+    location_map = {
+        'north': 'upper center',
+        'south': 'lower center',
+        'east': 'right',
+        'west': 'left',
+        'northeast': 'upper right',
+        'northwest': 'upper left',
+        'southeast': 'lower right',
+        'southwest': 'lower left',
+        'best': 'best',
+        'none': 'best',
+    }
+    
+    data = lib.io.loadmat(filename, squeeze_me=True, struct_as_record=False, simplify_cells=False)
+    matfig = data['hgS_070000']
+    childs = np.atleast_1d(matfig.children)
+    
+    if len([c for c in childs if c.type == 'axes']) > 1:
+        # Position - (left, bottom, width, height)
+        positions = np.stack([c.properties.Position for c in childs if c.type == 'axes'])
+        
+        n_cols = len(np.unique(positions[:,0]))
+        n_rows = len(np.unique(positions[:,1]))
+    else:
+        n_cols, n_rows = 1, 1
+    
+    x, y = size[0] * n_cols, size[1] * n_rows
+    
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(x, y), squeeze=False)
+    axes = axes.reshape(-1)
+    
+    i = 0
+    for c in childs:
+        if c.type == 'axes':
+            ax = axes[i]
+            
+            title_idx, xlabel_idx, ylabel_idx, _ = c.special - 1
+            
+            for j, line in enumerate(c.children):
+                if line.type in ['graph2d.lineseries', 'specgraph.errorbarseries']:
+                    capsize = getattr(line.properties, 'CapSize', None)
+                    color = getattr(line.properties, 'Color', (0, 0, 1))
+                    linestyle = getattr(line.properties, 'LineStyle', '-')
+                    linewidth = getattr(line.properties, 'LineWidth', None)
+                    marker = getattr(line.properties, 'Marker', 'none')
+                    marker_size = getattr(line.properties, 'MarkerSize', None)
+                    label = getattr(line.properties, 'DisplayName', None)
+            
+                    x = np.atleast_1d(line.properties.XData)
+                    y = np.atleast_1d(line.properties.YData)
+                    
+                    if line.type == 'graph2d.lineseries':
+                        ax.plot(x, y, color=color, linestyle=linestyle, linewidth=linewidth, marker=marker, ms=marker_size, label=label)
+                    else:
+                        lerr = np.atleast_1d(line.properties.LData)
+                        uerr = np.atleast_1d(line.properties.UData)
+                        ax.errorbar(x, y, yerr=(lerr, uerr), capsize=capsize, color=color, linestyle=linestyle, linewidth=linewidth, marker=marker, ms=marker_size, label=label)
+                    
+                elif line.type == 'text':
+                    text = line.properties.String
+                    interpreter = getattr(line.properties, 'Interpreter', None)
+                    fontsize = getattr(line.properties, 'FontSize', None)
+                    
+                    if j == xlabel_idx:
+                        ax.set_xlabel(text, fontsize=fontsize)
+                        
+                    elif j == ylabel_idx:
+                        ax.set_ylabel(text, fontsize=fontsize)
+                        
+                    elif j == title_idx:
+                        ax.set_title(text, fontsize=fontsize)
+                    
+            ax.grid(getattr(c.properties, 'XGrid', False))
+
+            if hasattr(c.properties, 'XTick'):
+                rotation = getattr(c.properties, 'XTickLabelRotation', None)
+                ax.set_xticks(c.properties.XTick, c.properties.XTickLabel, rotation=rotation)
+
+            if hasattr(c.properties, 'YTick'):
+                rotation = getattr(c.properties, 'YTickLabelRotation', None)
+                ax.set_yticks(c.properties.YTick, c.properties.YTickLabel, rotation=rotation)
+                
+            ax.set_xlim(c.properties.XLim)
+            ax.set_ylim(c.properties.YLim)
+            
+            i += 1
+            
+        elif c.type == 'scribe.legend':
+            location = c.properties.Location
+            fontsize = getattr(c.properties, 'FontSize', None)
+            plt.legend(loc=location_map[location])
+            
+    fig.tight_layout()
+    
+    return fig, axes.reshape(n_rows, n_cols)
