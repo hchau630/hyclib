@@ -5,12 +5,35 @@ from collections import namedtuple
 import numpy as np
 from numpy.testing import suppress_warnings
 from scipy import stats as spstats
+import statsmodels.api as sm
 
 from ..np import stats as npstats
 
 BinnedStatisticddResult = namedtuple('BinnedStatisticddResult',
                                      ('statistic', 'bin_edges',
                                       'binnumber'))
+LinregressResult = namedtuple('LinregressResult', ('slope', 'intercept', 'rvalue', 'pvalue', 'stderr', 'intercept_stderr'))
+
+def linregress(x, y, yerr=None, alternative='two-sided'):
+    if alternative != 'two-sided':
+        raise NotImplementedError('currently only allow alternative == "two-sided".')
+        
+    if yerr is not None:
+        weights = 1/yerr**2
+    else:
+        weights = 1.0
+        
+    model = sm.WLS(y, sm.add_constant(x), weights=weights)
+    res = model.fit()
+    res = LinregressResult(
+        slope=res.params[1],
+        intercept=res.params[0],
+        rvalue=res.rsquared**0.5,
+        pvalue=res.pvalues[1],
+        stderr=res.bse[1],
+        intercept_stderr=res.bse[0],
+    )
+    return res
 
 def _bincount(x, weights):
     if np.iscomplexobj(weights):

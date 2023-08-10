@@ -6,7 +6,24 @@ import numpy as np
 
 from ..core.itertools import flatten_seq
 
-__all__ = ['inv_perm', 'lexsort', 'unique', 'meshgrid_dd', 'use_deterministic_algorithms']
+__all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid_dd', 'meshgrid', 'use_deterministic_algorithms']
+
+def isconst(x, dim=None, **kwargs):
+    x = torch.as_tensor(x)
+    
+    if dim is None:
+        x = x.reshape(-1)
+    else:
+        if isinstance(dim, int):
+            dim = [dim]
+        dim = sorted([d % x.ndim for d in dim])[::-1]
+        for d in dim:
+            x = torch.movedim(x, d,-1)
+        x = x.reshape(*x.shape[:-len(dim)],-1)
+        
+    if x.is_floating_point():
+        return torch.isclose(x[...,:-1], x[...,1:], **kwargs).all(dim=-1)
+    return (x[...,:-1] == x[...,1:]).all(dim=-1)
 
 def inv_perm(x):
     x_inv = torch.empty_like(x)
@@ -202,9 +219,9 @@ def unique(x, dim=None, sorted=True, return_index=False, return_inverse=False, r
         return out['x']
     return tuple(out.values())
 
-def meshgrid_dd(tensors):
+def meshgrid_dd(*tensors):
     """
-    Pytorch version of a generalized np.meshgrid
+    Pytorch version of lib.np.meshgrid_dd
     Mesh together list of tensors of shapes (n_1_1,...,n_1_{M_1},N_1), (n_2_1,...,n_2_{M_2},N_2), ..., (n_P_1, ..., n_P_{M_P},N_P)
     Returns tensors of shapes 
     (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_1),
@@ -222,6 +239,30 @@ def meshgrid_dd(tensors):
     shapes = [[1]*M_befores[i]+sizes[i]+[1]*M_afters[i]+[Ns[i]] for i, tensor in enumerate(tensors)]
     expanded_tensors = [tensor.reshape(shapes[i]).expand(flatten_seq(sizes)+[Ns[i]]) for i, tensor in enumerate(tensors)]
     return expanded_tensors
+
+def meshgrid(*tensors, indexing='ij'):
+    """
+    Pytorch version of lib.np.meshgrid
+    Mesh together list of tensors of shapes (n_1_1,...,n_1_{M_1}), (n_2_1,...,n_2_{M_2}), ..., (n_P_1, ..., n_P_{M_P})
+    Returns tensors of shapes 
+    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P}),
+    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P}),
+    ...
+    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P})
+    
+    IMPORTANT: Data is NOT copied just like pytorch, but unlike numpy which copies by default.
+    """
+    if not indexing in ['ij', 'xy']:
+        raise ValueError(f"indexing must 'ij' or 'xy', but got {indexing}.")
+        
+    tensors = (tensor[...,None] for tensor in tensors)
+    tensors = meshgrid_dd(*tensors)
+    tensors = [tensor.squeeze(-1) for tensor in tensors]
+    
+    if indexing == 'xy':
+        tensors = [torch.swapaxes(tensor, 0, 1) for tensor in tensors]
+        
+    return tensors
 
 @contextlib.contextmanager
 def use_deterministic_algorithms():

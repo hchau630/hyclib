@@ -4,6 +4,124 @@ import pytest
 
 import hyclib as lib
 
+@pytest.mark.parametrize('x, dim, expected', [
+    (torch.tensor(2), None, True),
+    (torch.tensor([]), None, True),
+    (torch.tensor([]), 0, True),
+    (torch.tensor([1.0]), None, True),
+    (torch.tensor([1.0]), 0, True),
+    (torch.tensor([[1.0]]), None, True),
+    (torch.tensor([[1.0]]), 0, True),
+    (torch.tensor([[1.0]]), 1, True),
+    (torch.tensor([[1.0,1.0,1.0]]), None, True),
+    (torch.tensor([[1.0,0.5,1.0]]), None, False),
+    (torch.tensor([[1.0,1.0,1.0],
+                   [2.0,2.0,2.0]]), None, False),
+    (torch.tensor([[1.0,1.0,1.0],
+                   [2.0,2.0,2.0]]), 0, False),
+    (torch.tensor([[1.0,1.0,1.0],
+                   [2.0,2.0,2.0]]), 1, True),
+    (torch.tensor([[1.0,1.0,1.0],
+                   [2.0,2.0,2.0]]), (0,1), False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), None, False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), 0, True),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), 1, False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), -1, True),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (0,1), False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (1,0), False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (0,2), True),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (2,0), True),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (0,-1), True),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (-1,0), True),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (1,2), False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (2,1), False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (-1,-2), False),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,2.0,2.0]]]), (-2,-1), False),
+    (torch.tensor([[[1.0,1.0,0.5],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,0.5,2.0]]]),
+     0,
+     torch.tensor([[True, True, False],
+                   [True, False, True]])),
+    (torch.tensor([[[1.0,1.0,0.5],
+                    [1.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,1.0,2.0]]]),
+     1,
+     torch.tensor([[True, False, False],
+                   [False, True, False]])),
+    (torch.tensor([[[1.0,1.0,0.5],
+                    [2.0,2.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,1.0,2.0]]]),
+     2,
+     torch.tensor([[False, True],
+                   [True, False]])),
+    (torch.tensor([[[1.0,1.0,0.5],
+                    [2.0,1.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,1.0,2.0]]]),
+     (0,1),
+     torch.tensor([False, True, False])),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [0.5,1.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [2.0,1.0,2.0]]]),
+     (0,2),
+     torch.tensor([True, False])),
+    (torch.tensor([[[1.0,1.0,1.0],
+                    [0.5,1.0,2.0]],
+                   [[1.0,1.0,1.0],
+                    [1.0,1.0,1.0]]]),
+     (1,2),
+     torch.tensor([False, True])),
+])
+def test_isconst(x, dim, expected):
+    assert torch.all(lib.pt.isconst(x, dim=dim) == expected)
+
 def get_devices():
     devices = ['cpu']
     if torch.backends.mps.is_available():
@@ -110,3 +228,35 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
                     torch.testing.assert_close(torch_result[sort_idx], torch.from_numpy(np_result).to(device), equal_nan=True)
                 else:
                     torch.testing.assert_close(torch_result.movedim(dim, 0)[sort_idx].movedim(0, dim), torch.from_numpy(np_result).to(device), equal_nan=True)
+
+                    
+def test_meshgrid_dd():
+    a, b, c = torch.normal(0.0, 1.0, size=(3,5,2)), torch.normal(0.0, 1.0, size=(4,3)), torch.normal(0.0, 1.0, size=(5,7,2,4))
+    a_, b_, c_ = lib.pt.meshgrid_dd(a, b, c)
+    assert a_.shape == (3,5,4,5,7,2,2) and b_.shape == (3,5,4,5,7,2,3) and c_.shape == (3,5,4,5,7,2,4)
+    assert lib.pt.isconst(a_, dim=(2,3,4,5)).all() and (a_[:,:,0,0,0,0,:] == a).all()
+    assert lib.pt.isconst(b_, dim=(0,1,3,4,5)).all() and (b_[0,0,:,0,0,0,:] == b).all()
+    assert lib.pt.isconst(c_, dim=(0,1,2)).all() and (c_[0,0,0,:,:,:,:] == c).all()
+    
+    
+def test_meshgrid():
+    a, b, c = torch.normal(0.0, 1.0, size=(3,5)), torch.normal(0.0, 1.0, size=(4,)), torch.normal(0.0, 1.0, size=(5,7,2))
+    a_, b_, c_ = lib.pt.meshgrid(a, b, c)
+    assert a_.shape == (3,5,4,5,7,2) and b_.shape == (3,5,4,5,7,2) and c_.shape == (3,5,4,5,7,2)
+    assert lib.pt.isconst(a_, dim=(2,3,4,5)).all() and (a_[:,:,0,0,0,0] == a).all()
+    assert lib.pt.isconst(b_, dim=(0,1,3,4,5)).all() and (b_[0,0,:,0,0,0] == b).all()
+    assert lib.pt.isconst(c_, dim=(0,1,2)).all() and (c_[0,0,0,:,:,:] == c).all()
+    
+    a, b, c = torch.normal(0.0, 1.0, size=(3,)), torch.normal(0.0, 1.0, size=(4,)), torch.normal(0.0, 1.0, size=(5,))
+    a1, b1, c1 = lib.pt.meshgrid(a, b, c, indexing='ij')
+    a2, b2, c2 = torch.meshgrid(a, b, c, indexing='ij')
+    torch.testing.assert_close(a1, a2)
+    torch.testing.assert_close(b1, b2)
+    torch.testing.assert_close(c1, c2)
+    
+    a, b, c = torch.normal(0.0, 1.0, size=(3,)), torch.normal(0.0, 1.0, size=(4,)), torch.normal(0.0, 1.0, size=(5,))
+    a1, b1, c1 = lib.pt.meshgrid(a, b, c, indexing='xy')
+    a2, b2, c2 = torch.meshgrid(a, b, c, indexing='xy')
+    torch.testing.assert_close(a1, a2)
+    torch.testing.assert_close(b1, b2)
+    torch.testing.assert_close(c1, c2)

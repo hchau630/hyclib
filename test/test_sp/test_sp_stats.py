@@ -5,8 +5,42 @@ import pytest
 import numpy as np
 import pandas as pd
 from scipy import stats
+import statsmodels.api as sm
 
 import hyclib as lib
+
+def test_linregress():
+    x = np.linspace(0, 1)
+    y = 2*x + 1
+    xerr = np.random.normal(0.0, 0.5, size=len(x))
+    yerr = 1.5*xerr + 0.5
+    x = x + xerr
+    y = y + yerr
+
+    res = stats.linregress(x, y)
+    res1 = np.array([res.slope, res.intercept, res.rvalue, res.pvalue, res.stderr, res.intercept_stderr])
+
+    res = lib.sp.stats.linregress(x, y)
+    res2 = np.array(res)
+
+    np.testing.assert_allclose(res1, res2)
+
+    res = lib.sp.stats.linregress(x, y, yerr=yerr)
+    res1 = np.array(res)
+
+    model = sm.GLS(y, sm.add_constant(x), sigma=yerr**2)
+    res = model.fit()
+    res = lib.sp.stats.LinregressResult(
+        slope=res.params[1],
+        intercept=res.params[0],
+        rvalue=res.rsquared**0.5,
+        pvalue=res.pvalues[1],
+        stderr=res.bse[1],
+        intercept_stderr=res.bse[0],
+    )
+    res2 = np.array(res)
+
+    np.testing.assert_allclose(res1, res2)
 
 @pytest.mark.parametrize('D, bins', [
     (1, 100),
