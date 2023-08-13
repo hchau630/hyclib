@@ -23,6 +23,10 @@ def linregress(x, y, yerr=None, alternative='two-sided'):
     else:
         weights = 1.0
         
+    x = np.asarray(x)
+    y = np.asarray(y)
+    weights = np.asarray(weights)
+        
     model = sm.WLS(y, sm.add_constant(x), weights=weights)
     res = model.fit()
     res = LinregressResult(

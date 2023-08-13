@@ -30,6 +30,32 @@ def hide_unused_axes(axes):
     for ax in axes.flat:
         if not ax.has_data():
             ax.set_axis_off()
+            
+def errorbar(x, y, yerr=None, plot_kwargs=None, fill_kwargs=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+        
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    
+    if fill_kwargs is None:
+        fill_kwargs = {}
+        
+    plot_kwargs = {
+        'color': 'C0'
+    } | plot_kwargs
+    
+    fill_kwargs = {
+        'alpha': 0.15,
+        'facecolor': 'C0',
+        'edgecolor': 'none',
+    } | fill_kwargs
+        
+    artists = {}
+    artists['line'] = ax.plot(x, y, **plot_kwargs)
+    artists['fill'] = ax.fill_between(x, y - yerr, y + yerr, **fill_kwargs)
+    
+    return artists
 
 def plot_ci(fit_res, alpha=0.05, xlim=None, plot_kwargs=None, fill_kwargs=None, ax=None):
     if ax is None:
@@ -93,9 +119,13 @@ def regplot(x, y, yerr=None, scatter_kwargs=None, ci_kwargs=None, text_kwargs=No
     default_text_kwargs.update(text_kwargs)
     text_kwargs = default_text_kwargs
     
+    x = np.asarray(x)
+    y = np.asarray(y)
+    
     if yerr is None:
         model = sm.OLS(y,sm.add_constant(x))
     else:
+        yerr = np.asarray(yerr)
         model = sm.WLS(y,sm.add_constant(x),weights=1/yerr**2)
         
     fit_res = model.fit()
