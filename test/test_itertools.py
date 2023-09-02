@@ -2,6 +2,39 @@ import pytest
 
 import hyclib as lib
 
+def bad_iterable():
+    yield from [1/0,2,2]
+
+@pytest.mark.parametrize('iterable, expected', [
+    (range(0), True),
+    (range(1), True),
+    (range(2), False),
+    ([1,2,1], False),
+    ([2,2,2], True),
+    (bad_iterable(), ZeroDivisionError),
+])
+def test_isconst(iterable, expected):
+    if not isinstance(expected, bool):
+        with pytest.raises(expected):
+            lib.itertools.isconst(iterable)
+    else:
+        assert lib.itertools.isconst(iterable) == expected
+        
+@pytest.mark.parametrize('iterable, expected', [
+    (range(0), True),
+    (range(1), False),
+    (range(2), False),
+    ([], True),
+    ([1,2,1], False),
+    (bad_iterable(), ZeroDivisionError),
+])
+def test_isempty(iterable, expected):
+    if not isinstance(expected, bool):
+        with pytest.raises(expected):
+            lib.itertools.isempty(iterable)
+    else:
+        assert lib.itertools.isempty(iterable) == expected
+
 @pytest.mark.parametrize('s, depth, expected', [
     ([[1,2,[3]],[],(4,5),6], 1, [1,2,[3],4,5,6]),
     ([[1,2,[3]],[],(4,5),6], -1, [1,2,3,4,5,6]),
@@ -10,6 +43,37 @@ import hyclib as lib
 def test_flatten_seq(s, depth, expected):
     assert str(lib.itertools.flatten_seq(s, depth=depth)) == str(expected)
     
+@pytest.fixture
+def iterable():
+    return [[1,2,[3]],[],(4,5),6]
+    
+@pytest.mark.parametrize('depth, types, exclude, expected', [
+    (0, None, None, [[1,2,[3]],[],(4,5),6]),
+    (1, None, None, [1,2,[3],4,5,6]),
+    (-1, None, None, [1,2,3,4,5,6]),
+    (0, [], None, [[1,2,[3]],[],(4,5),6]),
+    (1, [], None, [[1,2,[3]],[],(4,5),6]),
+    (-1, [], None, [[1,2,[3]],[],(4,5),6]),
+    (0, [list], None, [[1,2,[3]],[],(4,5),6]),
+    (1, [list], None, [1,2,[3],(4,5),6]),
+    (-1, [list], None, [1,2,3,(4,5),6]),
+    (0, None, [list], [[1,2,[3]],[],(4,5),6]),
+    (1, None, [list], [[1,2,[3]],[],4,5,6]),
+    (-1, None, [list], [[1,2,[3]],[],4,5,6]),
+    (0, [], [list], [[1,2,[3]],[],(4,5),6]),
+    (1, [], [list], [[1,2,[3]],[],(4,5),6]),
+    (-1, [], [list], [[1,2,[3]],[],(4,5),6]),
+    (0, [list], [list], [[1,2,[3]],[],(4,5),6]),
+    (1, [list], [list], [[1,2,[3]],[],(4,5),6]),
+    (-1, [list], [list], [[1,2,[3]],[],(4,5),6]),
+    (0, None, [tuple], [[1,2,[3]],[],(4,5),6]),
+    (1, None, [tuple], [1,2,[3],(4,5),6]),
+    (-1, None, [tuple], [1,2,3,(4,5),6]),
+])
+def test_deep_iter(iterable, depth, types, exclude, expected):
+    for x, y in zip(lib.itertools.deep_iter(iterable, depth=depth, types=types, exclude=exclude), expected):
+        assert x == y
+    
 @pytest.mark.parametrize('d, depth, expected', [
     ({'a': {'b': {'c': 'd'}}}, 1, {'a.b': {'c': 'd'}}),
     ({'a': {'b': {'c': 'd'}}}, -1, {'a.b.c': 'd'}),
@@ -17,6 +81,26 @@ def test_flatten_seq(s, depth, expected):
 ])
 def test_flatten_dict(d, depth, expected):
     assert str(lib.itertools.flatten_dict(d, depth=depth)) == str(expected)
+    
+@pytest.fixture
+def d():
+    return {
+        'a': 'hi',
+        'b': {
+            'c': 1,
+            'd': 1.0,
+            'e': {}
+        },
+        'f': 'hii'
+    }
+    
+@pytest.mark.parametrize('delimiter, expected', [
+    ('.', {'a': 'hi', 'b.c': 1, 'b.d': 1.0, 'f': 'hii'}),
+    ('/', {'a': 'hi', 'b/c': 1, 'b/d': 1.0, 'f': 'hii'}),
+])
+def test_dict_iter(d, delimiter, expected):
+    for x, y in zip(lib.itertools.dict_iter(d, delimiter=delimiter), expected.items()):
+        assert x == y
     
 @pytest.mark.parametrize('d, depth, expected', [
     ({'a.b': {'b': {'c': 'd'}}}, 1, pytest.raises(ValueError)),

@@ -1,4 +1,22 @@
 import itertools
+import collections
+
+def isconst(iterable):
+    it = iter(iterable)
+    try:
+        v0 = next(it)
+    except StopIteration:
+        return True
+    else:
+        return all(v == v0 for v in it)
+    
+def isempty(iterable):
+    try:
+        next(iter(iterable))
+    except StopIteration:
+        return True
+    else:
+        return False
 
 def flatten_seq(s, depth=-1, dtypes=[list, tuple]):
     """
@@ -18,7 +36,7 @@ def flatten_seq(s, depth=-1, dtypes=[list, tuple]):
     
     """
     if not any([isinstance(s, dtype) for dtype in dtypes]):
-        raise TypeError(f"The arugment to flatten_list must be one of {dtypes}, not {type(s)}")
+        raise TypeError(f"The argument to flatten_list must be one of {dtypes}, not {type(s)}.")
     flattened_s = []
     for elem in s:
         if depth == 0 or not any([isinstance(elem, dtype) for dtype in dtypes]):
@@ -45,7 +63,7 @@ def flatten_dict(d, depth=-1):
     
     """
     if not isinstance(d, dict):
-        raise TypeError(f"The arugment to flatten_dict must be a dict, not {type(d)}")
+        raise TypeError(f"The argument to flatten_dict must be a dict, not {type(d)}.")
     flattened_dict = {}
     for k, v in d.items():
         if '.' in k:
@@ -57,13 +75,45 @@ def flatten_dict(d, depth=-1):
                 flattened_dict['.'.join([k, new_k])] = new_v
     return flattened_dict
 
+def deep_iter(iterable, depth=-1, types=None, exclude=None):
+    """
+    Recursively iterates ITERABLE up to a depth of DEPTH.
+    If depth < 0, then there is no recursion limit.
+    If depth == 0, then this is the same as iter(iterable).
+    Only iterates over instances of types and not instances
+    of exclude. Defaults to iterating over any Iterable.
+    """
+    if not isinstance(depth, int):
+        raise TypeError(f"depth must be an integer, but got {type(depth)=}.")
+        
+    if types is None:
+        types = (collections.abc.Iterable,)
+    types = tuple(types)
+        
+    if exclude is None:
+        exclude = []
+    exclude = tuple(exclude)
+        
+    if not all(issubclass(t, collections.abc.Iterable) for t in types + exclude):
+        raise TypeError(f"types and exclude must be subclasses of Iterable, but got {types=}, {exclude=}.")
+
+    return _deep_iter(iterable, depth, types, exclude)
+
+def _deep_iter(iterable, depth, types, exclude):
+    for v in iterable:
+        if depth != 0 and isinstance(v, types) and not isinstance(v, exclude):
+            yield from _deep_iter(v, depth-1, types, exclude)
+        else:
+            yield v
+
 def dict_iter(d, delimiter='.'):
     """
     Iterates over all leaf nodes of a dictionary in (key, value) pairs
     If delimiter is None, key is a tuple of the nested keys
     Otherwise, key is a string with the nested keys joined by delimiter
     """
-    assert isinstance(d, dict)
+    if not isinstance(d, dict):
+        raise TypeError(f"The argument to flatten_dict must be a dict, not {type(d)}.")
     
     for k, v in d.items():
         if isinstance(v, dict):
