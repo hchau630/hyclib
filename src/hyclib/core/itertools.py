@@ -1,7 +1,7 @@
 import itertools
 import collections
 
-def isconst(iterable):
+def isconst(iterable, retval=False):
     it = iter(iterable)
     try:
         v0 = next(it)

@@ -1,12 +1,10 @@
 import collections
 import contextlib
+import itertools
 
 import torch
-import numpy as np
 
-from ..core.itertools import flatten_seq
-
-__all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid_dd', 'meshgrid', 'use_deterministic_algorithms']
+__all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid', 'use_deterministic_algorithms']
 
 def isconst(x, dim=None, **kwargs):
     x = torch.as_tensor(x)
@@ -16,6 +14,8 @@ def isconst(x, dim=None, **kwargs):
     else:
         if isinstance(dim, int):
             dim = [dim]
+        if len(dim) == 0:
+            return torch.ones(x.shape, device=x.device, dtype=torch.bool)
         dim = sorted([d % x.ndim for d in dim])[::-1]
         for d in dim:
             x = torch.movedim(x, d,-1)
@@ -219,50 +219,85 @@ def unique(x, dim=None, sorted=True, return_index=False, return_inverse=False, r
         return out['x']
     return tuple(out.values())
 
-def meshgrid_dd(*tensors):
+def meshgrid(*tensors, indexing='ij', ndims=None):
     """
-    Pytorch version of lib.np.meshgrid_dd
-    Mesh together list of tensors of shapes (n_1_1,...,n_1_{M_1},N_1), (n_2_1,...,n_2_{M_2},N_2), ..., (n_P_1, ..., n_P_{M_P},N_P)
-    Returns tensors of shapes 
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_1),
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_2),
+    The most general version of torch.meshgrid. Meshes together tensors of shapes
+    (n_1_1,...,n_1_{ndims_1},*_1), (n_2_1,...,n_2_{ndims_2},*_2), ..., (n_P_1,...,n_P_{ndims_P},*_P).
+    indexing must be either 'ij' or 'xy'. Defaults to 'ij' like pytorch but unlike numpy.
+    If ndims is None, meshes over all dimensions. ndims can be an int or an Iterable.
+    Negative ndim has the same semantic meaning as slicing with a negative index.
+    
+    If indexing == 'ij', returns tensors of shapes 
+    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_1),
+    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_2),
     ...
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_P)
+    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_P)
+    
+    Otherwise, returns tensors of shapes
+    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_1),
+    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_2),
+    ...
+    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_P)
     
     IMPORTANT: Data is NOT copied just like pytorch, but unlike numpy which copies by default.
     """
-    sizes = [list(tensor.shape[:-1]) for tensor in tensors] # [[n_1,...,n_{M_1}],[n_1,...,.n_{M_2}],...]
-    Ms = np.array([tensor.ndim - 1 for tensor in tensors]) # [M_1, M_2, ...]
-    M_befores = np.cumsum(np.insert(Ms[:-1],0,0))
-    M_afters = np.sum(Ms) - np.cumsum(Ms)
-    Ns = [tensor.shape[-1] for tensor in tensors]
-    shapes = [[1]*M_befores[i]+sizes[i]+[1]*M_afters[i]+[Ns[i]] for i, tensor in enumerate(tensors)]
-    expanded_tensors = [tensor.reshape(shapes[i]).expand(flatten_seq(sizes)+[Ns[i]]) for i, tensor in enumerate(tensors)]
-    return expanded_tensors
-
-def meshgrid(*tensors, indexing='ij'):
-    """
-    Pytorch version of lib.np.meshgrid
-    Mesh together list of tensors of shapes (n_1_1,...,n_1_{M_1}), (n_2_1,...,n_2_{M_2}), ..., (n_P_1, ..., n_P_{M_P})
-    Returns tensors of shapes 
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P}),
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P}),
-    ...
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P})
-    
-    IMPORTANT: Data is NOT copied just like pytorch, but unlike numpy which copies by default.
-    """
-    if not indexing in ['ij', 'xy']:
+    if not indexing in {'ij', 'xy'}:
         raise ValueError(f"indexing must 'ij' or 'xy', but got {indexing}.")
-        
-    tensors = (tensor[...,None] for tensor in tensors)
-    tensors = meshgrid_dd(*tensors)
-    tensors = [tensor.squeeze(-1) for tensor in tensors]
     
-    if indexing == 'xy':
-        tensors = [torch.swapaxes(tensor, 0, 1) for tensor in tensors]
+    if not isinstance(ndims, collections.abc.Iterable):
+        ndims = [ndims] * len(tensors)
+    elif iter(ndims) is ndims:
+        ndims = list(ndims)
         
-    return tensors
+    if not all(isinstance(ndim, int) or ndim is None for ndim in ndims):
+        raise TypeError(f"ndim must be None or an int, but got {ndims}.")
+
+    if len(ndims) != len(tensors):
+        raise ValueError(
+            f"""ndims must have same number of elements as input tensors,
+            but got {len(ndims)=} and {len(tensors)=}."""
+        )
+        
+    if not all(
+        abs(ndim) <= tensor.ndim
+        for tensor, ndim in zip(tensors, ndims) if isinstance(ndim, int)
+    ):
+        raise ValueError(
+            f"""abs(ndim) cannot be greater than the corresponding tensor.ndim, but
+            {ndims=} while tensor ndims={[tensor.ndim for tensor in tensors]}."""
+        )
+    
+    cumndims = list(itertools.accumulate((
+        tensor.ndim if ndim is None else tensor.ndim + ndim if ndim < 0 else ndim
+        for tensor, ndim in zip(tensors, ndims)
+    )))
+    pre_cumndims = [0] + cumndims[:-1]
+    post_cumndims = (cumndims[-1] - cumndim for cumndim in cumndims)
+    pre_shapes, post_shapes = zip(*(
+        (tensor.shape[:ndim], tuple() if ndim is None else tensor.shape[ndim:])
+        for tensor, ndim in zip(tensors, ndims)
+    ))
+    shapes = (
+        (1,) * pre_cumndim + pre_shape + (1,) * post_cumndim + post_shape
+        for pre_shape, post_shape, pre_cumndim, post_cumndim
+        in zip(pre_shapes, post_shapes, pre_cumndims, post_cumndims)
+    )
+    shared_shape = tuple(itertools.chain(*pre_shapes))
+    tensors = (
+        tensor.reshape(shape).broadcast_to(shared_shape + post_shape)
+        for tensor, shape, post_shape in zip(tensors, shapes, post_shapes)
+    )
+    
+    if indexing == 'ij':
+        return list(tensors)
+        
+    return [
+        tensor.movedim(
+            tuple(range(cumndims[0], cumndims[1])),
+            tuple(range(cumndims[1] - cumndims[0]))
+        )
+        for tensor in tensors
+    ]
 
 @contextlib.contextmanager
 def use_deterministic_algorithms():
@@ -279,6 +314,8 @@ def use_deterministic_algorithms():
 ##########################################
 ### Implemented but untested functions ###
 ##########################################
+
+# import numpy as np
 
 # def ravel_multi_index(multi_index, dims):
 #     """

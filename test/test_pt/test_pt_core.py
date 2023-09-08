@@ -1,3 +1,6 @@
+import itertools
+import collections
+
 import torch
 import numpy as np
 import pytest
@@ -6,15 +9,19 @@ import hyclib as lib
 
 @pytest.mark.parametrize('x, dim, expected', [
     (torch.tensor(2), None, True),
+    (torch.tensor(2), tuple(), torch.tensor(True)),
     (torch.tensor([]), None, True),
     (torch.tensor([]), 0, True),
     (torch.tensor([1.0]), None, True),
     (torch.tensor([1.0]), 0, True),
+    (torch.tensor([1.0]), tuple(), torch.tensor([True])),
     (torch.tensor([[1.0]]), None, True),
     (torch.tensor([[1.0]]), 0, True),
     (torch.tensor([[1.0]]), 1, True),
+    (torch.tensor([[1.0]]), tuple(), torch.tensor([[True]])),
     (torch.tensor([[1.0,1.0,1.0]]), None, True),
     (torch.tensor([[1.0,0.5,1.0]]), None, False),
+    (torch.tensor([[1.0,0.5,1.0]]), tuple(), torch.tensor([[True, True, True]])),
     (torch.tensor([[1.0,1.0,1.0],
                    [2.0,2.0,2.0]]), None, False),
     (torch.tensor([[1.0,1.0,1.0],
@@ -23,6 +30,13 @@ import hyclib as lib
                    [2.0,2.0,2.0]]), 1, True),
     (torch.tensor([[1.0,1.0,1.0],
                    [2.0,2.0,2.0]]), (0,1), False),
+    (
+        torch.tensor([[1.0,1.0,1.0],
+                      [2.0,2.0,2.0]]),
+        tuple(),
+        torch.tensor([[True,True,True],
+                      [True,True,True]])
+    ),
     (torch.tensor([[[1.0,1.0,1.0],
                     [2.0,2.0,2.0]],
                    [[1.0,1.0,1.0],
@@ -179,6 +193,10 @@ def test_lexsort(M, D, shape, O, dim, device):
 @pytest.mark.parametrize('first_index', [True, False])
 @pytest.mark.parametrize('device', get_devices())
 def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_counts, first_index, device):
+    """
+    IMPORTANT: Currently (as of torch==2.0.1) has a MPS bug that causes some of the tests to fail. That bug
+    is addressed in the nightly version, i.e. all tests should pass if the nightly version is installed.
+    """
     kwargs = {
         'return_index': return_index,
         'return_inverse': return_inverse,
@@ -229,34 +247,119 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
                 else:
                     torch.testing.assert_close(torch_result.movedim(dim, 0)[sort_idx].movedim(0, dim), torch.from_numpy(np_result).to(device), equal_nan=True)
 
-                    
-def test_meshgrid_dd():
-    a, b, c = torch.normal(0.0, 1.0, size=(3,5,2)), torch.normal(0.0, 1.0, size=(4,3)), torch.normal(0.0, 1.0, size=(5,7,2,4))
-    a_, b_, c_ = lib.pt.meshgrid_dd(a, b, c)
-    assert a_.shape == (3,5,4,5,7,2,2) and b_.shape == (3,5,4,5,7,2,3) and c_.shape == (3,5,4,5,7,2,4)
-    assert lib.pt.isconst(a_, dim=(2,3,4,5)).all() and (a_[:,:,0,0,0,0,:] == a).all()
-    assert lib.pt.isconst(b_, dim=(0,1,3,4,5)).all() and (b_[0,0,:,0,0,0,:] == b).all()
-    assert lib.pt.isconst(c_, dim=(0,1,2)).all() and (c_[0,0,0,:,:,:,:] == c).all()
+@pytest.mark.parametrize('indexing, ndims, shared_shape, post_shapes, reduce_dims, indices', [
+    (
+        'ij',
+        None,
+        (3, 5, 2, 4, 3, 5, 7, 2, 4),
+        [tuple(), tuple(), tuple()],
+        [(3, 4, 5, 6, 7, 8), (0, 1, 2, 5, 6, 7, 8), (0, 1, 2, 3, 4)],
+        [np.s_[:, :, :, 0, 0, 0, 0, 0, 0], np.s_[0, 0, 0, :, :, 0, 0, 0, 0,], np.s_[0, 0, 0, 0, 0, :, :, :, :]]
+    ),
+    (
+        'ij',
+        0,
+        tuple(),
+        [(3, 5, 2), (4, 3), (5, 7, 2, 4)],
+        [tuple(), tuple(), tuple()],
+        [(Ellipsis,), (Ellipsis,), (Ellipsis,)]
+    ),
+    (
+        'ij',
+        -1,
+        (3, 5, 4, 5, 7, 2),
+        [(2,), (3,), (4,)],
+        [(2, 3, 4, 5), (0, 1, 3, 4, 5), (0, 1, 2)],
+        [np.s_[:, :, 0, 0, 0, 0], np.s_[0, 0, :, 0, 0, 0], np.s_[0, 0, 0, :, :, :]],
+    ),
+    (
+        'ij',
+        2,
+        (3, 5, 4, 3, 5, 7),
+        [(2,), tuple(), (2, 4)],
+        [(2, 3, 4, 5), (0, 1, 4, 5), (0, 1, 2, 3)],
+        [np.s_[:, :, 0, 0, 0, 0], np.s_[0, 0, :, :, 0, 0], np.s_[0, 0, 0, 0, :, :]],
+    ),
+    (
+        'ij',
+        [2, -1, 0],
+        (3, 5, 4),
+        [(2,), (3,), (5, 7, 2, 4)],
+        [(2,), (0, 1), tuple()],
+        [np.s_[:, :, 0], np.s_[0, 0, :], (Ellipsis,)],
+    ),
+    (
+        'xy',
+        None,
+        (4, 3, 3, 5, 2, 5, 7, 2, 4),
+        [tuple(), tuple(), tuple()],
+        [(0, 1, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4)],
+        [np.s_[0, 0, :, :, :, 0, 0, 0, 0], np.s_[:, :, 0, 0, 0, 0, 0, 0, 0,], np.s_[0, 0, 0, 0, 0, :, :, :, :]]
+    ),
+    (
+        'xy',
+        0,
+        tuple(),
+        [(3, 5, 2), (4, 3), (5, 7, 2, 4)],
+        [tuple(), tuple(), tuple()],
+        [(Ellipsis,), (Ellipsis,), (Ellipsis,)]
+    ),
+    (
+        'xy',
+        -1,
+        (4, 3, 5, 5, 7, 2),
+        [(2,), (3,), (4,)],
+        [(0, 3, 4, 5), (1, 2, 3, 4, 5), (0, 1, 2)],
+        [np.s_[0, :, :, 0, 0, 0], np.s_[:, 0, 0, 0, 0, 0], np.s_[0, 0, 0, :, :, :]],
+    ),
+    (
+        'xy',
+        2,
+        (4, 3, 3, 5, 5, 7),
+        [(2,), tuple(), (2, 4)],
+        [(0, 1, 4, 5), (2, 3, 4, 5), (0, 1, 2, 3)],
+        [np.s_[0, 0, :, :, 0, 0], np.s_[:, :, 0, 0, 0, 0], np.s_[0, 0, 0, 0, :, :]],
+    ),
+    (
+        'xy',
+        [2, -1, 0],
+        (4, 3, 5),
+        [(2,), (3,), (5, 7, 2, 4)],
+        [(0,), (1, 2), tuple()],
+        [np.s_[0, :, :], np.s_[:, 0, 0], (Ellipsis,)],
+    ),
+])
+def test_meshgrid(indexing, ndims, shared_shape, post_shapes, reduce_dims, indices):
+    sizes = ((3, 5, 2), (4, 3), (5, 7, 2, 4))
+    in_tensors = [torch.rand(size) for size in sizes]
+    out_tensors = lib.pt.meshgrid(*in_tensors, indexing=indexing, ndims=ndims)
     
+    assert all(out_tensor.shape == shared_shape + post_shape for out_tensor, post_shape in zip(out_tensors, post_shapes))
+    assert all(lib.pt.isconst(out_tensor, dim=reduce_dim).all() for out_tensor, reduce_dim in zip(out_tensors, reduce_dims))
+    assert all(
+        (out_tensor[tuple(index)] == in_tensor).all()
+        for in_tensor, out_tensor, index in zip(in_tensors, out_tensors, indices)
+    )
+
+@pytest.mark.parametrize('ndims', [
+    10,
+    -10,
+    (3, 3, 4),
+    (-1, -3, 2),
+    (1, 2, 1, 0),
+    (1, 2),
+])
+def test_meshgrid_invalid(ndims):
+    sizes = ((3, 5, 2), (4, 3), (5, 7, 2, 4))
+    in_tensors = [torch.rand(size) for size in sizes]
+    with pytest.raises(ValueError):
+        lib.pt.meshgrid(*in_tensors, ndims=ndims)
     
-def test_meshgrid():
-    a, b, c = torch.normal(0.0, 1.0, size=(3,5)), torch.normal(0.0, 1.0, size=(4,)), torch.normal(0.0, 1.0, size=(5,7,2))
-    a_, b_, c_ = lib.pt.meshgrid(a, b, c)
-    assert a_.shape == (3,5,4,5,7,2) and b_.shape == (3,5,4,5,7,2) and c_.shape == (3,5,4,5,7,2)
-    assert lib.pt.isconst(a_, dim=(2,3,4,5)).all() and (a_[:,:,0,0,0,0] == a).all()
-    assert lib.pt.isconst(b_, dim=(0,1,3,4,5)).all() and (b_[0,0,:,0,0,0] == b).all()
-    assert lib.pt.isconst(c_, dim=(0,1,2)).all() and (c_[0,0,0,:,:,:] == c).all()
-    
-    a, b, c = torch.normal(0.0, 1.0, size=(3,)), torch.normal(0.0, 1.0, size=(4,)), torch.normal(0.0, 1.0, size=(5,))
-    a1, b1, c1 = lib.pt.meshgrid(a, b, c, indexing='ij')
-    a2, b2, c2 = torch.meshgrid(a, b, c, indexing='ij')
-    torch.testing.assert_close(a1, a2)
-    torch.testing.assert_close(b1, b2)
-    torch.testing.assert_close(c1, c2)
-    
-    a, b, c = torch.normal(0.0, 1.0, size=(3,)), torch.normal(0.0, 1.0, size=(4,)), torch.normal(0.0, 1.0, size=(5,))
-    a1, b1, c1 = lib.pt.meshgrid(a, b, c, indexing='xy')
-    a2, b2, c2 = torch.meshgrid(a, b, c, indexing='xy')
+@pytest.mark.parametrize('indexing', ['ij', 'xy'])
+def test_meshgrid_1d(indexing):
+    a, b, c = torch.rand((3,)), torch.rand((4,)), torch.rand((5,))
+    a1, b1, c1 = lib.pt.meshgrid(a, b, c, indexing=indexing)
+    a2, b2, c2 = torch.meshgrid(a, b, c, indexing=indexing)
     torch.testing.assert_close(a1, a2)
     torch.testing.assert_close(b1, b2)
     torch.testing.assert_close(c1, c2)
