@@ -97,14 +97,18 @@ def deep_iter(iterable, depth=-1, types=None, exclude=None):
     if not all(issubclass(t, collections.abc.Iterable) for t in types + exclude):
         raise TypeError(f"types and exclude must be subclasses of Iterable, but got {types=}, {exclude=}.")
 
-    return _deep_iter(iterable, depth, types, exclude)
+    return _deep_iter(iterable, depth, types, exclude, set())
 
-def _deep_iter(iterable, depth, types, exclude):
-    for v in iterable:
-        if depth != 0 and isinstance(v, types) and not isinstance(v, exclude):
-            yield from _deep_iter(v, depth-1, types, exclude)
-        else:
-            yield v
+def _deep_iter(iterable, depth, types, exclude, memo):
+    if id(iterable) in memo: # prevents infinite recursion when encountering self-referential objects
+        yield iterable
+    else:
+        memo.add(id(iterable))
+        for v in iterable:
+            if depth != 0 and isinstance(v, types) and not isinstance(v, exclude):
+                yield from _deep_iter(v, depth-1, types, exclude, memo)
+            else:
+                yield v
 
 def dict_iter(d, delimiter='.'):
     """

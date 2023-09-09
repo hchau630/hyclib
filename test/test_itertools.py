@@ -73,6 +73,40 @@ def iterable():
 def test_deep_iter(iterable, depth, types, exclude, expected):
     for x, y in zip(lib.itertools.deep_iter(iterable, depth=depth, types=types, exclude=exclude), expected):
         assert x == y
+
+@pytest.fixture()
+def self_referential():
+    out = []
+
+    out.append({
+        'iterable': 'abcd',
+        'depth': -1,
+        'expected': ['a', 'b', 'c', 'd']
+    })
+
+    l = [6]
+    iterable = [1, 2, 3, [4, 5, l]]
+    l.append(iterable) # [1, 2, 3, [4, 5, [6, [...]]]]
+
+    out.append({
+        'iterable': iterable,
+        'depth': -1,
+        'expected': [1, 2, 3, 4, 5, 6, iterable]
+    })
+
+    out.append({
+        'iterable': iterable,
+        'depth': 1,
+        'expected': [1, 2, 3, 4, 5, [6, iterable]]
+    })
+
+    return out
+
+@pytest.mark.parametrize('idx', list(range(3)))
+def test_deep_iter_self_referential(idx, self_referential):
+    d = self_referential[idx]
+    for x, y in zip(lib.itertools.deep_iter(d['iterable'], depth=d['depth']), d['expected']):
+        assert x == y
     
 @pytest.mark.parametrize('d, depth, expected', [
     ({'a': {'b': {'c': 'd'}}}, 1, {'a.b': {'c': 'd'}}),
