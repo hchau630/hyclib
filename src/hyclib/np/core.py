@@ -1,10 +1,10 @@
-import numpy as np
+import collections
+import itertools
 
-from ..core.itertools import flatten_seq
+import numpy as np
 
 __all__ = [
     'isconst',
-    'meshgrid_dd',
     'meshgrid',
     'inv_perm',
     'unique_rows',
@@ -20,6 +20,8 @@ def isconst(x, axis=None, **kwargs):
     else:
         if isinstance(axis, int):
             axis = [axis]
+        if len(axis) == 0:
+            return np.ones(x.shape, dtype=bool)
         axis = sorted([d % x.ndim for d in axis])[::-1]
         for d in axis:
             x = np.moveaxis(x, d,-1)
@@ -29,57 +31,88 @@ def isconst(x, axis=None, **kwargs):
         return np.isclose(x[...,:-1], x[...,1:], **kwargs).all(axis=-1)
     return (x[...,:-1] == x[...,1:]).all(axis=-1)
 
-def meshgrid_dd(*arrs):
+def meshgrid(*tensors, indexing='ij', ndims=None):
     """
-    Generalized np.meshgrid
-    Mesh together list of arrays of shapes (n_1_1,...,n_1_{M_1},N_1), (n_2_1,...,n_2_{M_2},N_2), ..., (n_P_1, ..., n_P_{M_P},N_P)
-    Returns arrays of shapes 
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_1),
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_2),
-    ...
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P},N_P)
+    The most general version of np.meshgrid. Meshes together tensors of shapes
+    (n_1_1,...,n_1_{ndims_1},*_1), (n_2_1,...,n_2_{ndims_2},*_2), ..., (n_P_1,...,n_P_{ndims_P},*_P).
+    indexing must be either 'ij' or 'xy'. Defaults to 'ij' like pytorch but unlike numpy.
+    If ndims is None, meshes over all dimensions. ndims can be an int or an Iterable.
+    Negative ndim has the same semantic meaning as slicing with a negative index.
     
-    IMPORTANT: Data is NOT copied, unlike numpy which copies by default
+    If indexing == 'ij', returns tensors of shapes 
+    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_1),
+    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_2),
+    ...
+    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_P)
+    
+    Otherwise, returns tensors of shapes
+    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_1),
+    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_2),
+    ...
+    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_P)
+    
+    IMPORTANT: Data is NOT copied just like pytorch, but unlike numpy which copies by default.
     """
-    sizes = [list(arr.shape[:-1]) for arr in arrs] # [[n_1,...,n_{M_1}],[n_1,...,.n_{M_2}],...]
-    Ms = np.array([arr.ndim - 1 for arr in arrs]) # [M_1, M_2, ...]
-    M_befores = np.cumsum(np.insert(Ms[:-1],0,0))
-    M_afters = np.sum(Ms) - np.cumsum(Ms)
-    Ns = [arr.shape[-1] for arr in arrs]
-    shapes = [[1]*M_befores[i]+sizes[i]+[1]*M_afters[i]+[Ns[i]] for i, arr in enumerate(arrs)]
-    expanded_arrs = [np.broadcast_to(arr.reshape(shapes[i]), flatten_seq(sizes)+[Ns[i]]) for i, arr in enumerate(arrs)]
-    return expanded_arrs
+    if not indexing in {'ij', 'xy'}:
+        raise ValueError(f"indexing must 'ij' or 'xy', but got {indexing}.")
+    
+    if not isinstance(ndims, collections.abc.Iterable):
+        ndims = [ndims] * len(tensors)
+    elif iter(ndims) is ndims:
+        ndims = list(ndims)
+        
+    if not all(isinstance(ndim, int) or ndim is None for ndim in ndims):
+        raise TypeError(f"ndim must be None or an int, but got {ndims}.")
 
-def meshgrid(*arrs, **kwargs):
-    """
-    Generalized np.meshgrid
-    Mesh together list of arrays of shapes (n_1_1,...,n_1_{M_1}), (n_2_1,...,n_2_{M_2}), ..., (n_P_1, ..., n_P_{M_P})
-    Returns arrays of shapes 
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P}),
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P}),
-    ...
-    (n_1_1,...,n_1_{M_1},n_2_1,...,n_2_{M_2},...,n_P_1, ..., n_P_{M_P})
-    
-    IMPORTANT: By default, indexing='ij' rather than 'xy' as in np.meshgrid. This follows the pytorch convention.
-    IMPORTANT: Data is NOT copied, unlike numpy which copies by default
-    """
-    default_kwargs = {
-        'indexing': 'ij',
-    }
-    kwargs = default_kwargs | kwargs
-    invalid_keys = set(kwargs.keys()) - {'indexing'}
-    if len(invalid_keys) > 0:
-        raise TypeError(f"meshgrid() got an unexpected keyword argument '{invalid_keys.pop()}'")
-    indexing = kwargs['indexing']    
+    if len(ndims) != len(tensors):
+        raise ValueError(
+            f"""ndims must have same number of elements as input tensors,
+            but got {len(ndims)=} and {len(tensors)=}."""
+        )
+
+    tensors = tuple(np.asanyarray(tensor) for tensor in tensors)
         
-    arrs = (arr[...,None] for arr in arrs)
-    arrs = meshgrid_dd(*arrs)
-    arrs = [arr.squeeze(-1) for arr in arrs]
+    if not all(
+        abs(ndim) <= tensor.ndim
+        for tensor, ndim in zip(tensors, ndims) if isinstance(ndim, int)
+    ):
+        raise ValueError(
+            f"""abs(ndim) cannot be greater than the corresponding tensor.ndim, but
+            {ndims=} while tensor ndims={[tensor.ndim for tensor in tensors]}."""
+        )
     
-    if indexing == 'xy':
-        arrs = [np.swapaxes(arr, 0, 1) for arr in arrs]
+    cumndims = list(itertools.accumulate((
+        tensor.ndim if ndim is None else tensor.ndim + ndim if ndim < 0 else ndim
+        for tensor, ndim in zip(tensors, ndims)
+    )))
+    pre_cumndims = [0] + cumndims[:-1]
+    post_cumndims = (cumndims[-1] - cumndim for cumndim in cumndims)
+    pre_shapes, post_shapes = zip(*(
+        (tensor.shape[:ndim], () if ndim is None else tensor.shape[ndim:])
+        for tensor, ndim in zip(tensors, ndims)
+    ))
+    shapes = (
+        (1,) * pre_cumndim + pre_shape + (1,) * post_cumndim + post_shape
+        for pre_shape, post_shape, pre_cumndim, post_cumndim
+        in zip(pre_shapes, post_shapes, pre_cumndims, post_cumndims)
+    )
+    shared_shape = tuple(itertools.chain(*pre_shapes))
+    tensors = (
+        np.broadcast_to(tensor.reshape(shape), shared_shape + post_shape)
+        for tensor, shape, post_shape in zip(tensors, shapes, post_shapes)
+    )
+    
+    if indexing == 'ij':
+        return list(tensors)
         
-    return arrs
+    return [
+        np.moveaxis(
+            tensor,
+            tuple(range(cumndims[0], cumndims[1])),
+            tuple(range(cumndims[1] - cumndims[0]))
+        )
+        for tensor in tensors
+    ]
 
 def inv_perm(p):
     """

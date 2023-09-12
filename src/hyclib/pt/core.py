@@ -274,7 +274,7 @@ def meshgrid(*tensors, indexing='ij', ndims=None):
     pre_cumndims = [0] + cumndims[:-1]
     post_cumndims = (cumndims[-1] - cumndim for cumndim in cumndims)
     pre_shapes, post_shapes = zip(*(
-        (tensor.shape[:ndim], tuple() if ndim is None else tensor.shape[ndim:])
+        (tensor.shape[:ndim], () if ndim is None else tensor.shape[ndim:])
         for tensor, ndim in zip(tensors, ndims)
     ))
     shapes = (

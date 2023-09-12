@@ -9,19 +9,19 @@ import hyclib as lib
 
 @pytest.mark.parametrize('x, dim, expected', [
     (torch.tensor(2), None, True),
-    (torch.tensor(2), tuple(), torch.tensor(True)),
+    (torch.tensor(2), (), torch.tensor(True)),
     (torch.tensor([]), None, True),
     (torch.tensor([]), 0, True),
     (torch.tensor([1.0]), None, True),
     (torch.tensor([1.0]), 0, True),
-    (torch.tensor([1.0]), tuple(), torch.tensor([True])),
+    (torch.tensor([1.0]), (), torch.tensor([True])),
     (torch.tensor([[1.0]]), None, True),
     (torch.tensor([[1.0]]), 0, True),
     (torch.tensor([[1.0]]), 1, True),
-    (torch.tensor([[1.0]]), tuple(), torch.tensor([[True]])),
+    (torch.tensor([[1.0]]), (), torch.tensor([[True]])),
     (torch.tensor([[1.0,1.0,1.0]]), None, True),
     (torch.tensor([[1.0,0.5,1.0]]), None, False),
-    (torch.tensor([[1.0,0.5,1.0]]), tuple(), torch.tensor([[True, True, True]])),
+    (torch.tensor([[1.0,0.5,1.0]]), (), torch.tensor([[True, True, True]])),
     (torch.tensor([[1.0,1.0,1.0],
                    [2.0,2.0,2.0]]), None, False),
     (torch.tensor([[1.0,1.0,1.0],
@@ -33,7 +33,7 @@ import hyclib as lib
     (
         torch.tensor([[1.0,1.0,1.0],
                       [2.0,2.0,2.0]]),
-        tuple(),
+        (),
         torch.tensor([[True,True,True],
                       [True,True,True]])
     ),
@@ -252,16 +252,16 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
         'ij',
         None,
         (3, 5, 2, 4, 3, 5, 7, 2, 4),
-        [tuple(), tuple(), tuple()],
+        [(), (), ()],
         [(3, 4, 5, 6, 7, 8), (0, 1, 2, 5, 6, 7, 8), (0, 1, 2, 3, 4)],
         [np.s_[:, :, :, 0, 0, 0, 0, 0, 0], np.s_[0, 0, 0, :, :, 0, 0, 0, 0,], np.s_[0, 0, 0, 0, 0, :, :, :, :]]
     ),
     (
         'ij',
         0,
-        tuple(),
+        (),
         [(3, 5, 2), (4, 3), (5, 7, 2, 4)],
-        [tuple(), tuple(), tuple()],
+        [(), (), ()],
         [(Ellipsis,), (Ellipsis,), (Ellipsis,)]
     ),
     (
@@ -276,7 +276,7 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
         'ij',
         2,
         (3, 5, 4, 3, 5, 7),
-        [(2,), tuple(), (2, 4)],
+        [(2,), (), (2, 4)],
         [(2, 3, 4, 5), (0, 1, 4, 5), (0, 1, 2, 3)],
         [np.s_[:, :, 0, 0, 0, 0], np.s_[0, 0, :, :, 0, 0], np.s_[0, 0, 0, 0, :, :]],
     ),
@@ -285,23 +285,23 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
         [2, -1, 0],
         (3, 5, 4),
         [(2,), (3,), (5, 7, 2, 4)],
-        [(2,), (0, 1), tuple()],
+        [(2,), (0, 1), ()],
         [np.s_[:, :, 0], np.s_[0, 0, :], (Ellipsis,)],
     ),
     (
         'xy',
         None,
         (4, 3, 3, 5, 2, 5, 7, 2, 4),
-        [tuple(), tuple(), tuple()],
+        [(), (), ()],
         [(0, 1, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4)],
         [np.s_[0, 0, :, :, :, 0, 0, 0, 0], np.s_[:, :, 0, 0, 0, 0, 0, 0, 0,], np.s_[0, 0, 0, 0, 0, :, :, :, :]]
     ),
     (
         'xy',
         0,
-        tuple(),
+        (),
         [(3, 5, 2), (4, 3), (5, 7, 2, 4)],
-        [tuple(), tuple(), tuple()],
+        [(), (), ()],
         [(Ellipsis,), (Ellipsis,), (Ellipsis,)]
     ),
     (
@@ -316,7 +316,7 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
         'xy',
         2,
         (4, 3, 3, 5, 5, 7),
-        [(2,), tuple(), (2, 4)],
+        [(2,), (), (2, 4)],
         [(0, 1, 4, 5), (2, 3, 4, 5), (0, 1, 2, 3)],
         [np.s_[0, 0, :, :, 0, 0], np.s_[:, :, 0, 0, 0, 0], np.s_[0, 0, 0, 0, :, :]],
     ),
@@ -325,7 +325,7 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
         [2, -1, 0],
         (4, 3, 5),
         [(2,), (3,), (5, 7, 2, 4)],
-        [(0,), (1, 2), tuple()],
+        [(0,), (1, 2), ()],
         [np.s_[0, :, :], np.s_[:, 0, 0], (Ellipsis,)],
     ),
 ])
