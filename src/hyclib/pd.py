@@ -7,7 +7,6 @@ import numpy.ma as ma
 import torch
 import pandas as pd
 
-from .np import meshgrid_dd
 from .sp import stats
 
 logger = logging.getLogger(__name__)
