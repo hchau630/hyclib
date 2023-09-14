@@ -1,6 +1,7 @@
 import collections
 import contextlib
 import itertools
+import warnings
 
 import torch
 
@@ -54,8 +55,19 @@ def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return
     x = x.movedim(dim, 0)
     shape = x.shape
     x = x.reshape(shape[0], -1)
+
+    if x.device.type == 'mps':
+        warnings.warn(
+            (
+                "Due to tensor.flip() bug as of torch 2.0.1, tensor will be temporarily "
+                "moved to cpu, which incurs performance penalty. See Github issue #98266."
+            ),
+            UserWarning,
+        )
+        sort_idx = lexsort(x.t().cpu().flip(0).to('mps'))
+    else:
+        sort_idx = lexsort(x.t().flip(0))
     
-    sort_idx = lexsort(x.t().flip(0)) # note: as of torch.2.0.0 there is a bug with torch.flip on MPS
     x = x[sort_idx]
     
     if return_index:
