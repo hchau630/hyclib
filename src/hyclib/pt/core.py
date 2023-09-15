@@ -5,6 +5,8 @@ import warnings
 
 import torch
 
+from hyclib.np.core import meshshape
+
 __all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid', 'use_deterministic_algorithms']
 
 def isconst(x, dim=None, **kwargs):
@@ -279,35 +281,22 @@ def meshgrid(*tensors, indexing='ij', ndims=None):
             {ndims=} while tensor ndims={[tensor.ndim for tensor in tensors]}."""
         )
     
-    cumndims = list(itertools.accumulate((
-        tensor.ndim if ndim is None else tensor.ndim + ndim if ndim < 0 else ndim
-        for tensor, ndim in zip(tensors, ndims)
-    )))
-    pre_cumndims = [0] + cumndims[:-1]
-    post_cumndims = (cumndims[-1] - cumndim for cumndim in cumndims)
     pre_shapes, post_shapes = zip(*(
         (tensor.shape[:ndim], () if ndim is None else tensor.shape[ndim:])
         for tensor, ndim in zip(tensors, ndims)
     ))
-    shapes = (
-        (1,) * pre_cumndim + pre_shape + (1,) * post_cumndim + post_shape
-        for pre_shape, post_shape, pre_cumndim, post_cumndim
-        in zip(pre_shapes, post_shapes, pre_cumndims, post_cumndims)
-    )
     shared_shape = tuple(itertools.chain(*pre_shapes))
     tensors = (
-        tensor.reshape(shape).broadcast_to(shared_shape + post_shape)
-        for tensor, shape, post_shape in zip(tensors, shapes, post_shapes)
+        tensor.reshape(shape + post_shape).broadcast_to(shared_shape + post_shape)
+        for tensor, shape, post_shape in zip(tensors, meshshape(*pre_shapes), post_shapes)
     )
     
     if indexing == 'ij':
         return list(tensors)
-        
+
+    ndim0, ndim1 = len(pre_shapes[0]), len(pre_shapes[1])
     return [
-        tensor.movedim(
-            tuple(range(cumndims[0], cumndims[1])),
-            tuple(range(cumndims[1] - cumndims[0]))
-        )
+        tensor.movedim(tuple(range(ndim0, ndim0 + ndim1)), tuple(range(ndim1)))
         for tensor in tensors
     ]
 

@@ -15,6 +15,9 @@ from .core import (
 )
     
 import importlib
+import logging as lg
+
+logger = lg.getLogger(__name__)
 
 modules = [
     '.np',
@@ -30,8 +33,8 @@ for module in modules:
     try:
         importlib.import_module(module, package='hyclib')
     except ImportError as err:
-        pass
+        logger.info(f"Did not import {module=} due to ImportError {str(err)}.")
     
-del importlib, modules, module
+del importlib, modules, module, lg
 
 cfg = config.load_package_config('hyclib')

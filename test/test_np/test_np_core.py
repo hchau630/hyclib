@@ -249,3 +249,10 @@ def test_meshgrid_1d(indexing):
     np.testing.assert_allclose(a1, a2)
     np.testing.assert_allclose(b1, b2)
     np.testing.assert_allclose(c1, c2)
+
+def test_meshndim():
+    arrs = (np.random.normal(size=(3, 4, 5)), np.random.normal(size=(6, 7, 8, 9)))
+    ndims = (2, 3)
+    output = (arr[idx] for arr, idx in zip(arrs, lib.np.meshndim(*ndims)))
+    expected = lib.np.meshgrid(*arrs, ndims=ndims)
+    assert all((a == b).all() for a, b in zip(output, expected))

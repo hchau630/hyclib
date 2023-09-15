@@ -5,6 +5,8 @@ import numpy as np
 
 __all__ = [
     'isconst',
+    'meshshape',
+    'meshndim',
     'meshgrid',
     'inv_perm',
     'unique_rows',
@@ -30,6 +32,53 @@ def isconst(x, axis=None, **kwargs):
     if isinstance(x, np.floating):
         return np.isclose(x[...,:-1], x[...,1:], **kwargs).all(axis=-1)
     return (x[...,:-1] == x[...,1:]).all(axis=-1)
+
+def meshshape(*shapes):
+    """
+    The fundamental step of meshgrid, which is useful on its own as a standalone
+    function. Given n shapes
+    (s^1_1, ..., s^1_{D_1}), (s^2_1, ..., s^2_{D_2}), ..., (s^n_1, ..., s^n_{D_n}),
+    Yields shapes
+    (s^1_1, ..., s^1_{D_1}, 1, ..............., 1, ..., 1, ..............., 1),
+    (1, ..............., 1, s^2_1, ..., s^2_{D_2}, ..., 1, ..............., 1),
+    ...
+    (1, ..............., 1, 1, ..............., 1, ..., s^n_1, ..., s^n_{D_n}),
+    """
+    sumndim = sum(len(shape) for shape in shapes)
+    cumndim = 0
+    for shape in shapes:
+        ndim = len(shape)
+        yield (1,) * cumndim + shape + (1,) * (sumndim - cumndim - ndim)
+        cumndim += ndim
+
+def meshndim(*ndims):
+    """
+    Same as meshshape, but yields indices instead.
+    Note that reshaping using indices is faster than reshaping using shapes in numpy,
+    but the opposite is true in pytorch.
+    
+    f1 = lambda a, n, m: a.reshape((1,) * n  + a.shape + (1,) * m)
+    f2 = lambda a, n, m: a[(None,) * n + (slice(None),) * a.ndim + (None,) * m]
+    shape, n, m = (3,4,100,2,6), 5, 7
+    
+    a = np.random.normal(shape=shape)
+    %timeit f1(a, n, m)
+    489 ns ± 9.55 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
+    %timeit f2(a, n, m)
+    472 ns ± 7.58 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
+
+    a = torch.randn(shape)
+    %timeit f1(a, n, m)
+    2.62 µs ± 16.8 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
+    %timeit f2(a, n, m)
+    10.8 µs ± 102 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
+    """
+    sumndim = sum(ndims)
+    cumndim = 0
+    for ndim in ndims:
+        # we don't use Ellipsis because it doesn't allow for possible additional batch dimensions
+        yield (None,) * cumndim + (slice(None),) * ndim + (None,) * (sumndim - cumndim - ndim)
+        cumndim += ndim
 
 def meshgrid(*tensors, indexing='ij', ndims=None):
     """
@@ -81,36 +130,22 @@ def meshgrid(*tensors, indexing='ij', ndims=None):
             {ndims=} while tensor ndims={[tensor.ndim for tensor in tensors]}."""
         )
     
-    cumndims = list(itertools.accumulate((
-        tensor.ndim if ndim is None else tensor.ndim + ndim if ndim < 0 else ndim
-        for tensor, ndim in zip(tensors, ndims)
-    )))
-    pre_cumndims = [0] + cumndims[:-1]
-    post_cumndims = (cumndims[-1] - cumndim for cumndim in cumndims)
     pre_shapes, post_shapes = zip(*(
         (tensor.shape[:ndim], () if ndim is None else tensor.shape[ndim:])
         for tensor, ndim in zip(tensors, ndims)
     ))
-    shapes = (
-        (1,) * pre_cumndim + pre_shape + (1,) * post_cumndim + post_shape
-        for pre_shape, post_shape, pre_cumndim, post_cumndim
-        in zip(pre_shapes, post_shapes, pre_cumndims, post_cumndims)
-    )
     shared_shape = tuple(itertools.chain(*pre_shapes))
     tensors = (
-        np.broadcast_to(tensor.reshape(shape), shared_shape + post_shape)
-        for tensor, shape, post_shape in zip(tensors, shapes, post_shapes)
+        np.broadcast_to(tensor.reshape(shape + post_shape), shared_shape + post_shape)
+        for tensor, shape, post_shape in zip(tensors, meshshape(*pre_shapes), post_shapes)
     )
     
     if indexing == 'ij':
         return list(tensors)
-        
+
+    ndim0, ndim1 = len(pre_shapes[0]), len(pre_shapes[1])
     return [
-        np.moveaxis(
-            tensor,
-            tuple(range(cumndims[0], cumndims[1])),
-            tuple(range(cumndims[1] - cumndims[0]))
-        )
+        np.moveaxis(tensor, tuple(range(ndim0, ndim0 + ndim1)), tuple(range(ndim1)))
         for tensor in tensors
     ]
 
