@@ -1,17 +1,37 @@
-def pformat(d, indent=0, spaces=4, verbose=True):
+import collections
+
+def pformat(d, indent=0, spaces=4, depth=-1, formatters=None, verbose=True):
     output = ''
     for key, value in d.items():
         output += f"{' ' * spaces * indent}'{str(key)}':\n"
-        if isinstance(value, dict):
-            output += f"{pformat(value, indent=indent+1, spaces=spaces, verbose=verbose)}\n"
+        if depth != 0 and isinstance(value, dict):
+            output += f"{pformat(value, indent=indent+1, spaces=spaces, depth=depth - 1, formatters=formatters, verbose=verbose)}\n"
         else:
-            if not verbose:
-                value = type(value)
-            output += '\n'.join([f"{' ' * spaces * (indent+1)}{line}" for line in str(value).split('\n')]) + '\n'
+            if formatters and type(value) in formatters:
+                value = formatters[type(value)](value)
+            elif verbose:
+                value = str(value)
+            else:
+                value = str(type(value))
+            output += '\n'.join([f"{' ' * spaces * (indent+1)}{line}" for line in value.split('\n')]) + '\n'
     return output.rstrip('\n')
 
 def pprint(d, **kwargs):
     print(pformat(d, **kwargs))
+
+def iter_str(l):
+    if isinstance(l, str):
+        return l
+        
+    if not isinstance(l, collections.abc.Iterable):
+        return str(l)
+
+    if hasattr(l, 'items'):
+        s = ', '.join(f'{repr(k)}: {v}' for k, v in l.items())
+        return '{' + s + '}'
+        
+    s = ', '.join(iter_str(v) for v in l)
+    return '[' + s + ']'
     
 def pformat_english(*args):
     """
