@@ -21,16 +21,23 @@ def pprint(d, **kwargs):
 
 def iter_str(l):
     if isinstance(l, str):
-        return l
+        return repr(l)
         
-    if not isinstance(l, collections.abc.Iterable):
+    if not isinstance(l, (tuple, list, set, dict)):
         return str(l)
 
-    if hasattr(l, 'items'):
+    if isinstance(l, dict):
         s = ', '.join(f'{repr(k)}: {v}' for k, v in l.items())
         return '{' + s + '}'
         
     s = ', '.join(iter_str(v) for v in l)
+
+    if isinstance(l, set):
+        return '{' + s + '}'
+
+    if isinstance(l, tuple):
+        return '(' + s + ')'
+    
     return '[' + s + ']'
     
 def pformat_english(*args):
