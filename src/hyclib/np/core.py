@@ -33,7 +33,7 @@ def isconst(x, axis=None, **kwargs):
         return np.isclose(x[...,:-1], x[...,1:], **kwargs).all(axis=-1)
     return (x[...,:-1] == x[...,1:]).all(axis=-1)
 
-def meshshape(*shapes):
+def meshshape(*shapes, indexing='ij'):
     """
     The fundamental step of meshgrid, which is useful on its own as a standalone
     function. Given n shapes
@@ -43,7 +43,24 @@ def meshshape(*shapes):
     (1, ..............., 1, s^2_1, ..., s^2_{D_2}, ..., 1, ..............., 1),
     ...
     (1, ..............., 1, 1, ..............., 1, ..., s^n_1, ..., s^n_{D_n}),
+    If indexing == 'xy', yields shapes
+    (1, ..............., 1, s^1_1, ..., s^1_{D_1}, ..., 1, ..............., 1),
+    (s^2_1, ..., s^2_{D_2}, 1, ..............., 1, ..., 1, ..............., 1),
+    ...
+    (1, ..............., 1, 1, ..............., 1, ..., s^n_1, ..., s^n_{D_n}),
     """
+    if not indexing in {'ij', 'xy'}:
+        raise ValueError(f"indexing must 'ij' or 'xy', but got {indexing}.")
+
+    if indexing == 'xy':
+        if len(shapes) < 2:
+            raise ValueError(f"Must have at least 2 shapes if indexing == 'xy', but got {len(shapes)=}.")
+        
+        shapes = (shapes[1], shapes[0], *shapes[2:])
+        out = list(meshshape(*shapes, indexing='ij'))
+        out[1], out[0] = out[0], out[1]
+        yield from out
+    
     sumndim = sum(len(shape) for shape in shapes)
     cumndim = 0
     for shape in shapes:
@@ -51,7 +68,7 @@ def meshshape(*shapes):
         yield (1,) * cumndim + shape + (1,) * (sumndim - cumndim - ndim)
         cumndim += ndim
 
-def meshndim(*ndims):
+def meshndim(*ndims, indexing='ij'):
     """
     Same as meshshape, but yields indices instead.
     Note that reshaping using indices is faster than reshaping using shapes in numpy,
@@ -73,6 +90,18 @@ def meshndim(*ndims):
     %timeit f2(a, n, m)
     10.8 µs ± 102 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
     """
+    if not indexing in {'ij', 'xy'}:
+        raise ValueError(f"indexing must 'ij' or 'xy', but got {indexing}.")
+
+    if indexing == 'xy':
+        if len(shapes) < 2:
+            raise ValueError(f"Must have at least 2 shapes if indexing == 'xy', but got {len(shapes)=}.")
+        
+        shapes = (shapes[1], shapes[0], *shapes[2:])
+        out = list(meshndim(*shapes, indexing='ij'))
+        out[1], out[0] = out[0], out[1]
+        yield from out
+    
     sumndim = sum(ndims)
     cumndim = 0
     for ndim in ndims:
