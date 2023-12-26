@@ -233,88 +233,72 @@ def unique(x, dim=None, sorted=True, return_index=False, return_inverse=False, r
         return out['x']
     return tuple(out.values())
 
-def meshgrid(*tensors, indexing='ij', dims=None, sparse=False, trailing=False):
+def meshgrid(*tensors, indexing='ij', dims=None, sparse=False):
     """
-    The most general version of torch.meshgrid. If trailing is False, meshes together tensors of shapes
-    (n0[0], ..., n0[dims[0]], *0), (n1[0], ..., n1[dims[1]], *1), ..., (nP[0], ..., nP[dims[P]], *P), otherwise
-    (*0, n0[dims[0]], ..., n0[-1]), (*1, n1[dims[1]], ..., n1[-1]), ..., (*P, nP[dims[P]], ..., nP[-1]).
+    The most general version of torch.meshgrid. Meshes together tensors of shapes
+    (*00, n0[dims[0][0]], ..., n0[dims[0][1]], *01),
+    (*10, n1[dims[1][0]], ..., n1[dims[1][1]], *11),
+    ..., 
+    (*P0, nP[dims[P][0]], ..., nP[dims[P][1]], *P1),
     indexing must be either 'ij' or 'xy'. Defaults to 'ij' like pytorch but unlike numpy.
-    If dims is None, meshes over all dimensions. dims can be an int or an Iterable.
+    If dims is None, meshes over all dimensions. dims can be None, an int,
+    or a length-P list/tuple of length-2 list/tuple of ints or None, where P = len(tensors).
     Negative dim has the same semantic meaning as slicing with a negative index.
     If sparse, new dimensions are of length one instead of the broadcasted length.
     
     If indexing == 'ij', returns tensors of shapes 
-    (n0[0], ..., n0[dims[0]], n1[0], ..., n1[dims[1]], ..., nP[0], ..., nP[dims[P]], *0),
-    (n0[0], ..., n0[dims[0]], n1[0], ..., n1[dims[1]], ..., nP[0], ..., nP[dims[P]], *1),
-    ...
-    (n0[0], ..., n0[dims[0]], n1[0], ..., n1[dims[1]], ..., nP[0], ..., nP[dims[P]], *P),
+    (*00, n0[dims[0][0]], ..., n0[dims[0][1]], n1[dims[1][0]], ..., n1[dims[1][1]], ..., nP[dims[P][0]], ..., nP[dims[P][1]], *01),
+    (*10, n0[dims[0][0]], ..., n0[dims[0][1]], n1[dims[1][0]], ..., n1[dims[1][1]], ..., nP[dims[P][0]], ..., nP[dims[P][1]], *11),
+    ...,
+    (*P0, n0[dims[0][0]], ..., n0[dims[0][1]], n1[dims[1][0]], ..., n1[dims[1][1]], ..., nP[dims[P][0]], ..., nP[dims[P][1]], *P1),
     
     Otherwise, returns tensors of shapes
-    (n1[0], ..., n1[dims[1]], n0[0], ..., n0[dims[0]], ..., nP[0], ..., nP[dims[P]], *0),
-    (n1[0], ..., n1[dims[1]], n0[0], ..., n0[dims[0]], ..., nP[0], ..., nP[dims[P]], *1),
-    ...
-    (n1[0], ..., n1[dims[1]], n0[0], ..., n0[dims[0]], ..., nP[0], ..., nP[dims[P]], *P),
+    (*00, n1[dims[1][0]], ..., n1[dims[1][1]], n0[dims[0][0]], ..., n0[dims[0][1]], ..., nP[dims[P][0]], ..., nP[dims[P][1]], *01),
+    (*10, n1[dims[1][0]], ..., n1[dims[1][1]], n0[dims[0][0]], ..., n0[dims[0][1]], ..., nP[dims[P][0]], ..., nP[dims[P][1]], *11),
+    ...,
+    (*P0, n1[dims[1][0]], ..., n1[dims[1][1]], n0[dims[0][0]], ..., n0[dims[0][1]], ..., nP[dims[P][0]], ..., nP[dims[P][1]], *P1),
     
-    IMPORTANT: Data is NOT copied just like pytorch, but unlike numpy which copies by default.
+    IMPORTANT: Data is NOT copied just like pytorch, unlike numpy which copies by default.
     """
     if not indexing in {'ij', 'xy'}:
         raise ValueError(f"indexing must 'ij' or 'xy', but got {indexing}.")
     
-    if not isinstance(dims, collections.abc.Iterable):
-        dims = [dims] * len(tensors)
-    elif iter(dims) is dims:
-        dims = list(dims)
-        
-    if not all(isinstance(dim, int) or dim is None for dim in dims):
-        raise TypeError(f"dim must be None or an int, but got {dims}.")
-
-    if len(dims) != len(tensors):
-        raise ValueError(
-            f"""dims must have same number of elements as input tensors,
-            but got {len(dims)=} and {len(tensors)=}."""
+    if dims is None or isinstance(dims, int):
+        dims = [(None, dims)] * len(tensors)
+    elif not (
+        isinstance(dims, (list, tuple)) and len(dims) == len(tensors) and 
+        all(
+            (
+                isinstance(dim, (list, tuple)) and len(dim) == 2 and 
+                all(d is None or isinstance(d, int) for d in dim)
+            )
+            for dim in dims
         )
-        
-    if not all(
-        abs(dim) <= tensor.ndim
-        for tensor, dim in zip(tensors, dims) if isinstance(dim, int)
     ):
-        raise ValueError(
-            f"""abs(dim) cannot be greater than the corresponding tensor.ndim, but
-            {dims=} while tensor dims={[tensor.ndim for tensor in tensors]}."""
+        raise TypeError(
+            f"""dims must be None, an int, or a length-{len(tensors)}
+            list/tuple of length-2 list/tuple of None or int, but {dims=}."""
         )
 
-    if trailing:
-        pre_shapes, post_shapes = zip(*(
-            (() if dim is None else tensor.shape[:dim], tensor.shape[dim:])
-            for tensor, dim in zip(tensors, dims)
-        ))
-        shapes = list(meshshape(*post_shapes, indexing=indexing))
-        tensors = (
-            tensor.reshape(pre_shape + shape)
-            for tensor, shape, pre_shape in zip(tensors, shapes, pre_shapes)
+    pre_shapes, shapes, post_shapes = zip(*(
+        (
+            () if dim[0] is None else tensor.shape[:dim[0]],
+            tensor.shape[dim[0]:dim[1]],
+            () if dim[1] is None else tensor.shape[dim[1]:],
         )
-        if not sparse:
-            shared_shape = torch.broadcast_shapes(*shapes)
-            tensors = (
-                tensor.broadcast_to(pre_shape + shared_shape)
-                for tensor, pre_shape in zip(tensors, pre_shapes)
-            )
-    else:
-        pre_shapes, post_shapes = zip(*(
-            (tensor.shape[:dim], () if dim is None else tensor.shape[dim:])
-            for tensor, dim in zip(tensors, dims)
-        ))
-        shapes = list(meshshape(*pre_shapes, indexing=indexing))
+        for tensor, dim in zip(tensors, dims)
+    ))
+    shapes = list(meshshape(*shapes, indexing=indexing))
+    tensors = (
+        tensor.reshape(pre_shape + shape + post_shape)
+        for tensor, shape, pre_shape, post_shape in zip(tensors, shapes, pre_shapes, post_shapes)
+    )
+    if not sparse:
+        shape = torch.broadcast_shapes(*shapes)
         tensors = (
-            tensor.reshape(shape + post_shape)
-            for tensor, shape, post_shape in zip(tensors, shapes, post_shapes)
+            tensor.broadcast_to(pre_shape + shape + post_shape)
+            for tensor, pre_shape, post_shape in zip(tensors, pre_shapes, post_shapes)
         )
-        if not sparse:
-            shared_shape = torch.broadcast_shapes(*shapes)
-            tensors = (
-                tensor.broadcast_to(shared_shape + post_shape)
-                for tensor, post_shape in zip(tensors, post_shapes)
-            )
     
     return list(tensors)
 

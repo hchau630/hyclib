@@ -247,35 +247,40 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
                 else:
                     torch.testing.assert_close(torch_result.movedim(dim, 0)[sort_idx].movedim(0, dim), torch.from_numpy(np_result).to(device), equal_nan=True)
 
-@pytest.mark.parametrize('indexing, dims, trailing, shared_shape, post_shapes, inserted_dims', [
-    ('ij', None, False, (3, 5, 2, 4, 3, 5, 7, 2, 4), [(), (), ()], [(3, 4, 5, 6, 7, 8), (0, 1, 2, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
-    ('ij', 0, False, (), [(3, 5, 2), (4, 3), (5, 7, 2, 4)], [(), (), ()]),
-    ('ij', -1, False, (3, 5, 4, 5, 7, 2), [(2,), (3,), (4,)], [(2, 3, 4, 5), (0, 1, 3, 4, 5), (0, 1, 2)]),
-    ('ij', 2, False, (3, 5, 4, 3, 5, 7), [(2,), (), (2, 4)], [(2, 3, 4, 5), (0, 1, 4, 5), (0, 1, 2, 3)]),
-    ('ij', [2, -1, 0], False, (3, 5, 4), [(2,), (3,), (5, 7, 2, 4)], [(2,), (0, 1), (0, 1, 2)]),
-    ('xy', None, False, (4, 3, 3, 5, 2, 5, 7, 2, 4), [(), (), ()], [(0, 1, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
-    ('xy', 0, False, (), [(3, 5, 2), (4, 3), (5, 7, 2, 4)], [(), (), ()]),
-    ('xy', -1, False, (4, 3, 5, 5, 7, 2), [(2,), (3,), (4,)], [(0, 3, 4, 5), (1, 2, 3, 4, 5), (0, 1, 2)]),
-    ('xy', 2, False, (4, 3, 3, 5, 5, 7), [(2,), (), (2, 4)], [(0, 1, 4, 5), (2, 3, 4, 5), (0, 1, 2, 3)]),
-    ('xy', [2, -1, 0], False, (4, 3, 5), [(2,), (3,), (5, 7, 2, 4)], [(0,), (1, 2), (0, 1, 2)]),
-    ('ij', None, True, (3, 5, 2, 4, 3, 5, 7, 2, 4), [(), (), ()], [(3, 4, 5, 6, 7, 8), (0, 1, 2, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
-    ('ij', 0, True, (3, 5, 2, 4, 3, 5, 7, 2, 4), [(), (), ()], [(3, 4, 5, 6, 7, 8), (0, 1, 2, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
-    ('ij', -1, True, (2, 3, 4), [(3, 5), (4,), (5, 7, 2)], [(-1, -2), (-1, -3), (-2, -3)]),
-    ('ij', 2, True, (2, 2, 4), [(3, 5), (4, 3), (5, 7)], [(-1, -2), (-1, -2, -3), (-3,)]),
-    ('ij', [2, -1, 0], True, (2, 3, 5, 7, 2, 4), [(3, 5,), (4,), ()], [(-1, -2, -3, -4, -5), (-1, -2, -3, -4, -6), (-5, -6)]),
-    ('ij', [-2, -1, -1], True, (5, 2, 3, 4), [(3,), (4,), (5, 7, 2)], [(-1, -2), (-1, -3, -4), (-2, -3, -4)]),
-    ('xy', None, True, (4, 3, 3, 5, 2, 5, 7, 2, 4), [(), (), ()], [(0, 1, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
-    ('xy', 0, True, (4, 3, 3, 5, 2, 5, 7, 2, 4), [(), (), ()], [(0, 1, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
-    ('xy', -1, True, (3, 2, 4), [(3, 5), (4,), (5, 7, 2)], [(-1, -3), (-1, -2), (-2, -3)]),
-    ('xy', 2, True, (2, 2, 4), [(3, 5), (4, 3), (5, 7)], [(-1, -2), (-1, -2, -3), (-3,)]),
-    ('xy', [2, -1, 0], True, (3, 2, 5, 7, 2, 4), [(3, 5,), (4,), ()], [(-1, -2, -3, -4, -6), (-1, -2, -3, -4, -5), (-5, -6)]),
-    ('xy', [-2, -1, -1], True, (3, 5, 2, 4), [(3,), (4,), (5, 7, 2)], [(-1, -4), (-1, -2, -3), (-2, -3, -4)]),
+@pytest.mark.parametrize('indexing, dims, shared_shape, pre_shapes, post_shapes, inserted_dims', [
+    ('ij', None, (3, 5, 2, 4, 3, 5, 7, 2, 4), None, [(), (), ()], [(3, 4, 5, 6, 7, 8), (0, 1, 2, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
+    ('ij', 0, (), None, [(3, 5, 2), (4, 3), (5, 7, 2, 4)], [(), (), ()]),
+    ('ij', -1, (3, 5, 4, 5, 7, 2), None, [(2,), (3,), (4,)], [(2, 3, 4, 5), (0, 1, 3, 4, 5), (0, 1, 2)]),
+    ('ij', 2, (3, 5, 4, 3, 5, 7), None, [(2,), (), (2, 4)], [(2, 3, 4, 5), (0, 1, 4, 5), (0, 1, 2, 3)]),
+    ('ij', [(None, 2), (None, -1), (None, 0)], (3, 5, 4), None, [(2,), (3,), (5, 7, 2, 4)], [(2,), (0, 1), (0, 1, 2)]),
+    ('xy', None, (4, 3, 3, 5, 2, 5, 7, 2, 4), None, [(), (), ()], [(0, 1, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
+    ('xy', 0, (), None, [(3, 5, 2), (4, 3), (5, 7, 2, 4)], [(), (), ()]),
+    ('xy', -1, (4, 3, 5, 5, 7, 2), None, [(2,), (3,), (4,)], [(0, 3, 4, 5), (1, 2, 3, 4, 5), (0, 1, 2)]),
+    ('xy', 2, (4, 3, 3, 5, 5, 7), None, [(2,), (), (2, 4)], [(0, 1, 4, 5), (2, 3, 4, 5), (0, 1, 2, 3)]),
+    ('xy', [(None, 2), (None, -1), (None, 0)], (4, 3, 5), None, [(2,), (3,), (5, 7, 2, 4)], [(0,), (1, 2), (0, 1, 2)]),
+    ('ij', [(0, None)] * 3, (3, 5, 2, 4, 3, 5, 7, 2, 4), [(), (), ()], None, [(3, 4, 5, 6, 7, 8), (0, 1, 2, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
+    ('ij', [(-1, None)] * 3, (2, 3, 4), [(3, 5), (4,), (5, 7, 2)], None, [(-1, -2), (-1, -3), (-2, -3)]),
+    ('ij', [(2, None)] * 3, (2, 2, 4), [(3, 5), (4, 3), (5, 7)], None, [(-1, -2), (-1, -2, -3), (-3,)]),
+    ('ij', [(2, None), (-1, None), (0, None)], (2, 3, 5, 7, 2, 4), [(3, 5,), (4,), ()], None, [(-1, -2, -3, -4, -5), (-1, -2, -3, -4, -6), (-5, -6)]),
+    ('ij', [(-2, None), (-1, None), (-1, None)], (5, 2, 3, 4), [(3,), (4,), (5, 7, 2)], None, [(-1, -2), (-1, -3, -4), (-2, -3, -4)]),
+    ('xy', [(0, None)] * 3, (4, 3, 3, 5, 2, 5, 7, 2, 4), [(), (), ()], None, [(0, 1, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4)]),
+    ('xy', [(-1, None)] * 3, (3, 2, 4), [(3, 5), (4,), (5, 7, 2)], None, [(-1, -3), (-1, -2), (-2, -3)]),
+    ('xy', [(2, None)] * 3, (2, 2, 4), [(3, 5), (4, 3), (5, 7)], None, [(-1, -2), (-1, -2, -3), (-3,)]),
+    ('xy', [(2, None), (-1, None), (0, None)], (3, 2, 5, 7, 2, 4), [(3, 5,), (4,), ()], None, [(-1, -2, -3, -4, -6), (-1, -2, -3, -4, -5), (-5, -6)]),
+    ('xy', [(-2, None), (-1, None), (-1, None)], (3, 5, 2, 4), [(3,), (4,), (5, 7, 2)], None, [(-1, -4), (-1, -2, -3), (-2, -3, -4)]),
+    ('ij', [(1, -1), (-1, None), (1, -1)], (5, 3, 7, 2), [(3,), (4,), (5,)], [(2,), (), (4,)], [(2, 3, 4), (1, 3, 4), (1, 2)]),
+    ('xy', [(1, -1), (-1, None), (1, -1)], (3, 5, 7, 2), [(3,), (4,), (5,)], [(2,), (), (4,)], [(1, 3, 4), (2, 3, 4), (1, 2)]),
 ])
 @pytest.mark.parametrize('sparse', [False, True])
-def test_meshgrid(indexing, dims, sparse, trailing, shared_shape, post_shapes, inserted_dims):
+def test_meshgrid(indexing, dims, sparse, shared_shape, pre_shapes, post_shapes, inserted_dims):
+    if pre_shapes is None:
+        pre_shapes = [()] * 3
+    if post_shapes is None:
+        post_shapes = [()] * 3
+    
     sizes = ((3, 5, 2), (4, 3), (5, 7, 2, 4))
     in_tensors = [torch.rand(size) for size in sizes]
-    out_tensors = lib.pt.meshgrid(*in_tensors, indexing=indexing, dims=dims, sparse=sparse, trailing=trailing)
+    out_tensors = lib.pt.meshgrid(*in_tensors, indexing=indexing, dims=dims, sparse=sparse)
 
     masks, indices = [], []
     for out_tensor, inserted_dim in zip(out_tensors, inserted_dims):
@@ -286,36 +291,27 @@ def test_meshgrid(indexing, dims, sparse, trailing, shared_shape, post_shapes, i
         masks.append(mask)
         indices.append(tuple(index))
 
-    expected_shapes = [post_shape + shared_shape if trailing else shared_shape + post_shape for post_shape in post_shapes]
-    
-    if sparse:
-        for out_tensor, expected_shape, mask in zip(out_tensors, expected_shapes, masks):
+    for out_tensor, pre_shape, post_shape, mask in zip(out_tensors, pre_shapes, post_shapes, masks):
+        expected_shape = pre_shape + shared_shape + post_shape
+        if sparse:
             expected_shape = torch.tensor(expected_shape)
             expected_shape[mask] = 1
-            assert out_tensor.shape == tuple(expected_shape.tolist())
-    else:
-        assert all(out_tensor.shape == expected_shape for out_tensor, expected_shape in zip(out_tensors, expected_shapes))
+            expected_shape = tuple(expected_shape.tolist())
+        assert out_tensor.shape == expected_shape
             
     assert all(lib.pt.isconst(out_tensor, dim=inserted_dim).all() for out_tensor, inserted_dim in zip(out_tensors, inserted_dims))
-    for in_tensor, out_tensor, index in zip(in_tensors, out_tensors, indices):
-        print(index, out_tensor[index].shape, in_tensor.shape)
-    assert all(
-        (out_tensor[index] == in_tensor).all()
-        for in_tensor, out_tensor, index in zip(in_tensors, out_tensors, indices)
-    )
+    assert all((out_tensor[index] == in_tensor).all() for in_tensor, out_tensor, index in zip(in_tensors, out_tensors, indices))
 
 @pytest.mark.parametrize('dims', [
-    10,
-    -10,
-    (3, 3, 4),
-    (-1, -3, 2),
-    (1, 2, 1, 0),
-    (1, 2),
+    0.5,
+    (0, 1, 2),
+    [(0, 1), (0, 1)],
+    [(0, 1, 2), (0, 1, 2), (0, 1, 2)],
 ])
 def test_meshgrid_invalid(dims):
     sizes = ((3, 5, 2), (4, 3), (5, 7, 2, 4))
     in_tensors = [torch.rand(size) for size in sizes]
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         lib.pt.meshgrid(*in_tensors, dims=dims)
     
 @pytest.mark.parametrize('indexing', ['ij', 'xy'])
