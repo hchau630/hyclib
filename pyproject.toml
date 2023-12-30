@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hyclib"
-version = "0.1.29"
+version = "0.1.30"
 description = "Commonly used tools across my own personal projects."
 readme = "README.md"
 requires-python = ">=3.9" # package developed with python v3.9.16
@@ -32,7 +32,7 @@ numerics = [
 ml = [
     'numpy',
     'scipy',
-    'torch',
+    'torch>=2.1.0',  # required for several MPS bug fixes
     'statsmodels',
 ]
 viz = [
@@ -43,7 +43,7 @@ viz = [
 data = [
     'numpy',
     'scipy',
-    'torch',
+    'torch>=2.1.0',  # required for several MPS bug fixes
     'statsmodels',
     'pandas',
     'tables', # optional dependency for pandas that is needed here

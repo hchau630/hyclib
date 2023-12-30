@@ -58,17 +58,7 @@ def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return
     shape = x.shape
     x = x.reshape(shape[0], -1)
 
-    if x.device.type == 'mps':
-        warnings.warn(
-            (
-                "Due to tensor.flip() bug as of torch 2.0.1, tensor will be temporarily "
-                "moved to cpu, which incurs performance penalty. See Github issue #98266."
-            ),
-            UserWarning,
-        )
-        sort_idx = lexsort(x.t().cpu().flip(0).to('mps'))
-    else:
-        sort_idx = lexsort(x.t().flip(0))
+    sort_idx = lexsort(x.t().flip(0))  # requires torch>=2.1.0 for this to work correctly on MPS
     
     x = x[sort_idx]
     
@@ -84,24 +74,24 @@ def _unique_sorted(x, dim=None, return_index=False, return_inverse=False, return
             out['counts'] = counts
 
         # the following code doesn't work right now on MPS due to MPS determinism bug
-#         ret = torch.unique_consecutive(x, dim=0, return_inverse=True, return_counts=return_counts)
+        # ret = torch.unique_consecutive(x, dim=0, return_inverse=True, return_counts=return_counts)
 
-#         x, inverse = ret[0], ret[1]
-#         args = (len(inverse)-1, -1, -1) if first_index else (len(inverse),)
-#         with use_deterministic_algorithms() if first_index else contextlib.nullcontext():
-#             # scatter_ is non-deterministic by default and would result in a random index rather than the first index
-#             index = inverse.new_empty(len(x)).scatter_(
-#                 0,
-#                 inverse.flip(0) if first_index else inverse,
-#                 torch.arange(*args, dtype=inverse.dtype, device=inverse.device),
-#             )
+        # x, inverse = ret[0], ret[1]
+        # args = (len(inverse)-1, -1, -1) if first_index else (len(inverse),)
+        # with use_deterministic_algorithms() if first_index else contextlib.nullcontext():
+        #     # scatter_ is non-deterministic by default and would result in a random index rather than the first index
+        #     index = inverse.new_empty(len(x)).scatter_(
+        #         0,
+        #         inverse.flip(0) if first_index else inverse,
+        #         torch.arange(*args, dtype=inverse.dtype, device=inverse.device),
+        #     )
         
-#         # gather results into a dictionary
-#         out = {'x': x, 'index': index}
-#         if return_inverse:
-#             out['inverse'] = inverse
-#         if return_counts:
-#             out['counts'] = ret[2]
+        # # gather results into a dictionary
+        # out = {'x': x, 'index': index}
+        # if return_inverse:
+        #     out['inverse'] = inverse
+        # if return_counts:
+        #     out['counts'] = ret[2]
 
     else:
         ret = torch.unique_consecutive(x, dim=0, return_inverse=return_inverse, return_counts=return_counts)

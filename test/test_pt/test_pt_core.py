@@ -192,10 +192,13 @@ def test_lexsort(M, D, shape, O, dim, device):
 @pytest.mark.parametrize('sorted', [True, False])
 @pytest.mark.parametrize('first_index', [True, False])
 @pytest.mark.parametrize('device', get_devices())
-def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_counts, first_index, device):
+# @pytest.mark.parametrize('device', ['cpu'])
+# @pytest.mark.benchmark(
+#     max_time=0.25,
+# )
+def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_counts, first_index, device, benchmark):
     """
-    IMPORTANT: Currently (as of torch==2.0.1) has a MPS bug that causes some of the tests to fail. That bug
-    is addressed in the nightly version, i.e. all tests should pass if the nightly version is installed.
+    IMPORTANT: Must have torch>=2.1.0, which fixes a bunch of MPS bugs.
     """
     kwargs = {
         'return_index': return_index,
@@ -213,7 +216,9 @@ def test_unique(M, shape, O, dim, sorted, return_index, return_inverse, return_c
     t = t.to(device)
     a = t.cpu().numpy()
 
-    torch_results = [out_i for out_i in as_tuple(lib.pt.unique(t, dim=dim, sorted=sorted, first_index=first_index, **kwargs))]
+    # torch_results = benchmark(lib.pt.unique, t, dim=dim, sorted=sorted, first_index=first_index, **kwargs)
+    torch_results = lib.pt.unique(t, dim=dim, sorted=sorted, first_index=first_index, **kwargs)
+    torch_results = list(as_tuple(torch_results))
     np_results = as_tuple(np.unique(t.cpu().numpy(), axis=dim, equal_nan=False, **np_kwargs))
     if not kwargs['return_index']:
         np_results = list(np_results)
