@@ -156,4 +156,24 @@ def test_bincount_nan_policy():
         torch.tensor([0.0, 1.5, np.nan, np.nan, 1.0, np.nan]),
         equal_nan=True,
     )
+
+@pytest.mark.parametrize('w', [torch.tensor([], requires_grad=True), torch.tensor([[], []])])
+@pytest.mark.parametrize('minlength', [0, 10])
+def test_bincount_zero_length(w, minlength):
+    """
+    Check that the bug where lib.pt.bincount raises error on inputs with length 0 is fixed.
+    """
+    a = torch.tensor([], dtype=torch.long)
+    t = lib.pt.bincount(a, weights=w, minlength=minlength)
+
+    if w.ndim == 2:
+        arr = []
+        for wi in w:
+            arr.append(np.bincount(a.numpy(), weights=wi.detach().numpy(), minlength=minlength))
+        arr = np.stack(arr)
+    elif w.ndim == 1:
+        arr = np.bincount(a.numpy(), weights=w.detach().numpy(), minlength=minlength)
+    else:
+        raise RuntimeError()
     
+    assert np.allclose(t.detach().numpy(), arr, equal_nan=True)

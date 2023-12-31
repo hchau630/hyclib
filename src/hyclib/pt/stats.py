@@ -32,14 +32,20 @@ def _bincount(indices, weights=None, minlength=0):
     
     if indices.is_floating_point():
         raise TypeError(f"indices must be a tensor of integer dtype, but {indices.dtype=}.")
-    if indices.min() < 0:
-        raise ValueError(f"indices must not be negative, but {indices.min()=}.")
-    if indices.ndim != 1:
-        raise ValueError(f"indices must be 1D, but {indices.ndim=}.")
-    if not indices.device == weights.device:
+        
+    if indices.ndim != 1 or weights.ndim < 1:
+        raise ValueError(f"indices must be 1D and weights must be at least 1D, but {indices.ndim=} and {weights.ndim=}.")
+        
+    if len(indices) != weights.shape[-1]:
+        raise ValueError(f"Length of indices must be same as last dimension of weights, but {len(indices)=} and {weights.shape[-1]=}.")
+    
+    if indices.device != weights.device:
         raise ValueError(f"indices and weights must be on the same device, but {indices.device=} and {weights.device=}.")
+    
+    if len(indices) > 0 and indices.min() < 0:
+        raise ValueError(f"indices must not be negative, but {indices.min()=}.")
 
-    shape = (*weights.shape[:-1], max(indices.max().item()+1, minlength))
+    shape = (*weights.shape[:-1], max(indices.max().item()+1, minlength) if len(indices) > 0 else minlength)
     
     indices = indices.broadcast_to(weights.shape)
     t = torch.zeros(shape, dtype=weights.dtype, device=weights.device)
