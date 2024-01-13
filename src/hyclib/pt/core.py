@@ -7,7 +7,7 @@ import torch
 
 from hyclib.np.core import meshshape
 
-__all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid', 'use_deterministic_algorithms']
+__all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid', 'use_deterministic_algorithms', 'repeat_interleave']
 
 def isconst(x, dim=None, **kwargs):
     x = torch.as_tensor(x)
@@ -303,6 +303,48 @@ def use_deterministic_algorithms():
         yield
     finally:
         torch.use_deterministic_algorithms(is_deterministic)
+
+
+def repeat_interleave(tensor, repeats, chunks=None):
+    """
+    Generalized torch.repeat_interleave
+    Copied from @MadPhysicist's solution: https://stackoverflow.com/questions/63510977/repeat-but-in-variable-sized-chunks-in-numpy
+    
+    Example due to @MadPhysicist in the same link:
+    tensor = torch.tensor([0, 5, 2, 10, 11, 20, 21, 22, 23])
+    #                      >     <  >    <  >            <
+    chunks = torch.tensor([3, 2, 4])
+    repeats = torch.tensor([1, 3, 2])
+    
+    repeat_interleave(tensor, repeats, chunks=chunks)
+    >>> torch.tensor([0, 5, 2, 10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23])
+    # repeats:        >  1  <  >         3          <  >              2             <
+    """
+    if chunks is None:
+        return tensor.repeat_interleave(repeats)
+
+    if tensor.ndim != 1 or repeats.ndim != 1 or chunks.ndim != 1:
+        raise ValueError(f"tensor, repeats, and chunks must all be 1D, but {tensor.ndim=}, {repeats.ndim=} and {chunks.ndim=}.")
+    if len(repeats) != len(chunks):
+        raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
+    if chunks.sum() != len(tensor):
+        raise ValueError(f"sum of chunks must be the length of tensor, but {chunks.sum()=} and {len(tensor)=}.")
+
+    regions = chunks * repeats
+    index = torch.arange(regions.sum().item(), device=tensor.device)
+
+    segments = chunks.repeat_interleave(repeats)
+    resets = segments[:-1].cumsum(dim=0)
+    offsets = torch.zeros_like(index)
+    offsets[resets] = segments[:-1]
+    offsets[regions[:-1].cumsum(dim=0)] -= chunks[:-1]
+
+    index -= offsets.cumsum(dim=0)
+
+    out = tensor[index]
+    
+    return out
+
 
 ##########################################
 ### Implemented but untested functions ###

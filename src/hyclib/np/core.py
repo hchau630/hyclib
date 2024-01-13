@@ -271,9 +271,9 @@ def repeat(arr, repeats, chunks=None):
     chunks = np.array([3, 2, 4])
     repeats = np.array([1, 3, 2])
     
-    print(repeat(arr, repeats, chunks=chunks))
-    >>>      [0, 1, 2, 10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23])
-    # repeats:>  1  <  >         3          <  >              2             <
+    repeat(arr, repeats, chunks=chunks)
+    >>> np.array([0, 1, 2, 10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23])
+    # repeats:    >  1  <  >         3          <  >              2             <
     """
     if chunks is None:
         return np.repeat(arr, repeats)

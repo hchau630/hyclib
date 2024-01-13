@@ -256,3 +256,15 @@ def test_meshndim():
     output = (arr[idx] for arr, idx in zip(arrs, lib.np.meshndim(*ndims)))
     expected = lib.np.meshgrid(*arrs, ndims=ndims)
     assert all((a == b).all() for a, b in zip(output, expected))
+
+@pytest.mark.parametrize('dtype', [np.int64, np.float32])
+def test_repeat(dtype):
+    tensor = np.array([0, 5, 2, 10, 11, 20, 21, 22, 23], dtype=dtype)
+
+    chunks = np.array([3, 2, 4])
+    repeats = np.array([1, 3, 2])
+    
+    out = lib.np.repeat(tensor, repeats, chunks=chunks)
+    expected = np.array([0, 5, 2, 10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23], dtype=dtype)
+
+    np.testing.assert_allclose(out, expected)

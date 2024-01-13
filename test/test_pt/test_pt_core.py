@@ -327,3 +327,16 @@ def test_meshgrid_1d(indexing):
     torch.testing.assert_close(a1, a2)
     torch.testing.assert_close(b1, b2)
     torch.testing.assert_close(c1, c2)
+
+@pytest.mark.parametrize('dtype', [torch.long, torch.float])
+@pytest.mark.parametrize('device', get_devices())
+def test_repeat_interleave(dtype, device):
+    tensor = torch.tensor([0, 5, 2, 10, 11, 20, 21, 22, 23], dtype=dtype, device=device)
+
+    chunks = torch.tensor([3, 2, 4], device=device)
+    repeats = torch.tensor([1, 3, 2], device=device)
+    
+    out = lib.pt.repeat_interleave(tensor, repeats, chunks=chunks)
+    expected = torch.tensor([0, 5, 2, 10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23], dtype=dtype, device=device)
+
+    torch.testing.assert_close(out, expected)
