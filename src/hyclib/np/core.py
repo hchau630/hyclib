@@ -292,10 +292,9 @@ def repeat(arr, repeats, chunks=None, validate=True):
     iszero = repeats == 0
     if iszero.any():
         head_indices = np.concatenate([[0], chunks]).cumsum()[:-1]
-        zero_chunks = chunks[iszero]
-        index = np.arange(len(arr) - zero_chunks.sum())
+        index = np.arange(len(arr) - chunks[iszero].sum())
         offsets = np.zeros_like(index)
-        offsets[head_indices[iszero]] -= zero_chunks
+        offsets[head_indices[:-1][iszero[:-1]]] -= chunks[:-1][iszero[:-1]]
         index -= offsets.cumsum()
         return repeat(arr[index], repeats[~iszero], chunks[~iszero], validate=False)
 

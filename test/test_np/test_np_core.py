@@ -273,6 +273,7 @@ def test_repeat(dtype):
 @pytest.mark.parametrize('repeats, expected', [
     ([3, 0, 2], [0, 5, 2, 0, 5, 2, 0, 5, 2, 20, 21, 22, 23, 20, 21, 22, 23]),
     ([0, 3, 2], [10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23]),
+    ([3, 2, 0], [0, 5, 2, 0, 5, 2, 0, 5, 2, 10, 11, 10, 11]),
 ])
 def test_repeat_zero_repeat(repeats, expected, dtype):
     """Fix bug in edge case where there are zeros in repeats."""

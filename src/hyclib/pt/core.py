@@ -336,10 +336,9 @@ def repeat_interleave(tensor, repeats, chunks=None, validate=True):
     if iszero.any():
         head_indices = chunks.cumsum(dim=0).roll(1)
         head_indices[0] = 0
-        zero_chunks = chunks[iszero]
-        index = torch.arange(len(tensor) - zero_chunks.sum().item(), device=tensor.device)
+        index = torch.arange(len(tensor) - chunks[iszero].sum().item(), device=tensor.device)
         offsets = torch.zeros_like(index)
-        offsets[head_indices[iszero]] -= zero_chunks
+        offsets[head_indices[:-1][iszero[:-1]]] -= chunks[:-1][iszero[:-1]]
         index -= offsets.cumsum(dim=0)
         return repeat_interleave(tensor[index], repeats[~iszero], chunks[~iszero], validate=False)
 
@@ -350,8 +349,6 @@ def repeat_interleave(tensor, repeats, chunks=None, validate=True):
     offsets = torch.zeros_like(index)  # [0, ..., 0]
     offsets[resets] = segments[:-1]  # [0, 0, 0, 3, 0, 2, 0, 2, 0, 2, 0, 0, 0, 4, 0, 0, 0]
     offsets[regions[:-1].cumsum(dim=0)] -= chunks[:-1]  # [0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 4, 0, 0, 0]
-    print(offsets)
-    print(offsets.cumsum(dim=0))
 
     index -= offsets.cumsum(dim=0)  # [0, 1, 2, 3, 4, 3, 4, 3, 4, 5, 6, 7, 8, 5, 6, 7, 8]
 
