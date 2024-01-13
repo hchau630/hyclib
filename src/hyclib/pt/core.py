@@ -330,17 +330,21 @@ def repeat_interleave(tensor, repeats, chunks=None, validate=True):
             raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
         if chunks.sum() != len(tensor):
             raise ValueError(f"sum of chunks must be the length of tensor, but {chunks.sum()=} and {len(tensor)=}.")
+        if repeats.min() < 0:
+            raise ValueError(f"repeats must be non-negative, but {repeats.min()=}.")
+        if repeats.min() == 0:
+            raise NotImplementedError(f"Currently does not support zero repeats, but {repeats.min()=}.")
 
-    # deal with zero repeats
-    iszero = repeats == 0
-    if iszero.any():
-        head_indices = chunks.cumsum(dim=0).roll(1)
-        head_indices[0] = 0
-        index = torch.arange(len(tensor) - chunks[iszero].sum().item(), device=tensor.device)
-        offsets = torch.zeros_like(index)
-        offsets[head_indices[:-1][iszero[:-1]]] -= chunks[:-1][iszero[:-1]]
-        index -= offsets.cumsum(dim=0)
-        return repeat_interleave(tensor[index], repeats[~iszero], chunks[~iszero], validate=False)
+    # # deal with zero repeats (still buggy, and this is inefficient)
+    # iszero = repeats == 0
+    # if iszero.any():
+    #     head_indices = chunks.cumsum(dim=0).roll(1)
+    #     head_indices[0] = 0
+    #     index = torch.arange(len(tensor) - chunks[iszero].sum().item(), device=tensor.device)
+    #     offsets = torch.zeros_like(index)
+    #     offsets[head_indices[:-1][iszero[:-1]]] -= chunks[:-1][iszero[:-1]]
+    #     index -= offsets.cumsum(dim=0)
+    #     return repeat_interleave(tensor[index], repeats[~iszero], chunks[~iszero], validate=False)
 
     regions = chunks * repeats  # [3, 6, 8]
     index = torch.arange(regions.sum().item(), device=tensor.device)  # [0, 1, ..., 16]

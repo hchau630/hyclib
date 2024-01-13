@@ -29,7 +29,7 @@ def isconst(x, axis=None, **kwargs):
             x = np.moveaxis(x, d,-1)
         x = x.reshape(*x.shape[:-len(axis)],-1)
         
-    if isinstance(x, np.floating):
+    if np.issubdtype(x.dtype, np.floating):
         return np.isclose(x[...,:-1], x[...,1:], **kwargs).all(axis=-1)
     return (x[...,:-1] == x[...,1:]).all(axis=-1)
 
@@ -109,74 +109,75 @@ def meshndim(*ndims, indexing='ij'):
         yield (None,) * cumndim + (slice(None),) * ndim + (None,) * (sumndim - cumndim - ndim)
         cumndim += ndim
 
-def meshgrid(*tensors, indexing='ij', ndims=None):
+def meshgrid(*arrays, indexing='ij', axes=None, sparse=False):
     """
-    The most general version of np.meshgrid. Meshes together tensors of shapes
-    (n_1_1,...,n_1_{ndims_1},*_1), (n_2_1,...,n_2_{ndims_2},*_2), ..., (n_P_1,...,n_P_{ndims_P},*_P).
+    The most general version of np.meshgrid. Meshes together arrays of shapes
+    (*00, n0[axes[0][0]], ..., n0[axes[0][1]], *01),
+    (*10, n1[axes[1][0]], ..., n1[axes[1][1]], *11),
+    ..., 
+    (*P0, nP[axes[P][0]], ..., nP[axes[P][1]], *P1),
     indexing must be either 'ij' or 'xy'. Defaults to 'ij' like pytorch but unlike numpy.
-    If ndims is None, meshes over all dimensions. ndims can be an int or an Iterable.
-    Negative ndim has the same semantic meaning as slicing with a negative index.
+    If axes is None, meshes over all dimensions. axes can be None, an int,
+    or a length-P list/tuple of length-2 list/tuple of ints or None, where P = len(arrays).
+    Negative axis has the same semantic meaning as slicing with a negative index.
+    If sparse, new dimensions are of length one instead of the broadcasted length.
     
-    If indexing == 'ij', returns tensors of shapes 
-    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_1),
-    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_2),
-    ...
-    (n_1_1,...,n_1_{ndims_1},n_2_1,...,n_2_{ndims_2},...,n_P_1,...,n_P_{ndims_P},*_P)
+    If indexing == 'ij', returns arrays of shapes 
+    (*00, n0[axes[0][0]], ..., n0[axes[0][1]], n1[axes[1][0]], ..., n1[axes[1][1]], ..., nP[axes[P][0]], ..., nP[axes[P][1]], *01),
+    (*10, n0[axes[0][0]], ..., n0[axes[0][1]], n1[axes[1][0]], ..., n1[axes[1][1]], ..., nP[axes[P][0]], ..., nP[axes[P][1]], *11),
+    ...,
+    (*P0, n0[axes[0][0]], ..., n0[axes[0][1]], n1[axes[1][0]], ..., n1[axes[1][1]], ..., nP[axes[P][0]], ..., nP[axes[P][1]], *P1),
     
-    Otherwise, returns tensors of shapes
-    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_1),
-    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_2),
-    ...
-    (n_2_1,...,n_2_{ndims_2},n_1_1,...,n_1_{ndims_1},...,n_P_1,...,n_P_{ndims_P},*_P)
+    Otherwise, returns arrays of shapes
+    (*00, n1[axes[1][0]], ..., n1[axes[1][1]], n0[axes[0][0]], ..., n0[axes[0][1]], ..., nP[axes[P][0]], ..., nP[axes[P][1]], *01),
+    (*10, n1[axes[1][0]], ..., n1[axes[1][1]], n0[axes[0][0]], ..., n0[axes[0][1]], ..., nP[axes[P][0]], ..., nP[axes[P][1]], *11),
+    ...,
+    (*P0, n1[axes[1][0]], ..., n1[axes[1][1]], n0[axes[0][0]], ..., n0[axes[0][1]], ..., nP[axes[P][0]], ..., nP[axes[P][1]], *P1),
     
-    IMPORTANT: Data is NOT copied just like pytorch, but unlike numpy which copies by default.
+    IMPORTANT: Data is NOT copied just like pytorch, unlike numpy which copies by default.
     """
     if not indexing in {'ij', 'xy'}:
         raise ValueError(f"indexing must 'ij' or 'xy', but got {indexing}.")
     
-    if not isinstance(ndims, collections.abc.Iterable):
-        ndims = [ndims] * len(tensors)
-    elif iter(ndims) is ndims:
-        ndims = list(ndims)
-        
-    if not all(isinstance(ndim, int) or ndim is None for ndim in ndims):
-        raise TypeError(f"ndim must be None or an int, but got {ndims}.")
-
-    if len(ndims) != len(tensors):
-        raise ValueError(
-            f"""ndims must have same number of elements as input tensors,
-            but got {len(ndims)=} and {len(tensors)=}."""
+    if axes is None or isinstance(axes, int):
+        axes = [(None, axes)] * len(arrays)
+    elif not (
+        isinstance(axes, (list, tuple)) and len(axes) == len(arrays) and 
+        all(
+            (
+                isinstance(axis, (list, tuple)) and len(axis) == 2 and 
+                all(d is None or isinstance(d, int) for d in axis)
+            )
+            for axis in axes
         )
-
-    tensors = tuple(np.asanyarray(tensor) for tensor in tensors)
-        
-    if not all(
-        abs(ndim) <= tensor.ndim
-        for tensor, ndim in zip(tensors, ndims) if isinstance(ndim, int)
     ):
-        raise ValueError(
-            f"""abs(ndim) cannot be greater than the corresponding tensor.ndim, but
-            {ndims=} while tensor ndims={[tensor.ndim for tensor in tensors]}."""
+        raise TypeError(
+            f"""axes must be None, an int, or a length-{len(arrays)}
+            list/tuple of length-2 list/tuple of None or int, but {axes=}."""
+        )
+
+    pre_shapes, shapes, post_shapes = zip(*(
+        (
+            () if axis[0] is None else array.shape[:axis[0]],
+            array.shape[axis[0]:axis[1]],
+            () if axis[1] is None else array.shape[axis[1]:],
+        )
+        for array, axis in zip(arrays, axes)
+    ))
+    shapes = list(meshshape(*shapes, indexing=indexing))
+    arrays = (
+        array.reshape(pre_shape + shape + post_shape)
+        for array, shape, pre_shape, post_shape in zip(arrays, shapes, pre_shapes, post_shapes)
+    )
+    if not sparse:
+        shape = np.broadcast_shapes(*shapes)
+        arrays = (
+            np.broadcast_to(array, pre_shape + shape + post_shape)
+            for array, pre_shape, post_shape in zip(arrays, pre_shapes, post_shapes)
         )
     
-    pre_shapes, post_shapes = zip(*(
-        (tensor.shape[:ndim], () if ndim is None else tensor.shape[ndim:])
-        for tensor, ndim in zip(tensors, ndims)
-    ))
-    shared_shape = tuple(itertools.chain(*pre_shapes))
-    tensors = (
-        np.broadcast_to(tensor.reshape(shape + post_shape), shared_shape + post_shape)
-        for tensor, shape, post_shape in zip(tensors, meshshape(*pre_shapes), post_shapes)
-    )
-    
-    if indexing == 'ij':
-        return list(tensors)
+    return list(arrays)
 
-    ndim0, ndim1 = len(pre_shapes[0]), len(pre_shapes[1])
-    return [
-        np.moveaxis(tensor, tuple(range(ndim0, ndim0 + ndim1)), tuple(range(ndim1)))
-        for tensor in tensors
-    ]
 
 def inv_perm(p):
     """
@@ -287,16 +288,20 @@ def repeat(arr, repeats, chunks=None, validate=True):
             raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
         if chunks.sum() != len(arr):
             raise ValueError(f"sum of chunks must be the length of arr, but {chunks.sum()=} and {len(arr)=}.")
+        if repeats.min() < 0:
+            raise ValueError(f"repeats must be non-negative, but {repeats.min()=}.")
+        if repeats.min() == 0:
+            raise NotImplementedError(f"Currently does not support zero repeats, but {repeats.min()=}.")
 
-    # deal with zero repeats
-    iszero = repeats == 0
-    if iszero.any():
-        head_indices = np.concatenate([[0], chunks]).cumsum()[:-1]
-        index = np.arange(len(arr) - chunks[iszero].sum())
-        offsets = np.zeros_like(index)
-        offsets[head_indices[:-1][iszero[:-1]]] -= chunks[:-1][iszero[:-1]]
-        index -= offsets.cumsum()
-        return repeat(arr[index], repeats[~iszero], chunks[~iszero], validate=False)
+    # # deal with zero repeats (still buggy, and this is inefficient)
+    # iszero = repeats == 0
+    # if iszero.any():
+    #     head_indices = np.concatenate([[0], chunks]).cumsum()[:-1]
+    #     index = np.arange(len(arr) - chunks[iszero].sum())
+    #     offsets = np.zeros_like(index)
+    #     offsets[head_indices[:-1][iszero[:-1]]] -= chunks[:-1][iszero[:-1]]
+    #     index -= offsets.cumsum()
+    #     return repeat(arr[index], repeats[~iszero], chunks[~iszero], validate=False)
 
     regions = chunks * repeats
     index = np.arange(regions.sum())

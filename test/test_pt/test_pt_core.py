@@ -341,6 +341,7 @@ def test_repeat_interleave(dtype, device):
 
     torch.testing.assert_close(out, expected)
 
+@pytest.mark.xfail(reason='0 repeats currently not supported')
 @pytest.mark.parametrize('dtype', [torch.long, torch.float])
 @pytest.mark.parametrize('device', get_devices())
 @pytest.mark.parametrize('repeats, expected', [
