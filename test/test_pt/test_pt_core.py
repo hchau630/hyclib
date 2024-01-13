@@ -340,3 +340,21 @@ def test_repeat_interleave(dtype, device):
     expected = torch.tensor([0, 5, 2, 10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23], dtype=dtype, device=device)
 
     torch.testing.assert_close(out, expected)
+
+@pytest.mark.parametrize('dtype', [torch.long, torch.float])
+@pytest.mark.parametrize('device', get_devices())
+@pytest.mark.parametrize('repeats, expected', [
+    ([3, 0, 2], [0, 5, 2, 0, 5, 2, 0, 5, 2, 20, 21, 22, 23, 20, 21, 22, 23]),
+    ([0, 3, 2], [10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23]),
+])
+def test_repeat_interleave_zero_repeat(repeats, expected, dtype, device):
+    """Fix bug in edge case where there are zeros in repeats."""
+    tensor = torch.tensor([0, 5, 2, 10, 11, 20, 21, 22, 23], dtype=dtype, device=device)
+
+    chunks = torch.tensor([3, 2, 4], device=device)
+    repeats = torch.tensor(repeats, device=device)
+    
+    out = lib.pt.repeat_interleave(tensor, repeats, chunks=chunks)
+    expected = torch.tensor(expected, dtype=dtype, device=device)
+
+    torch.testing.assert_close(out, expected)

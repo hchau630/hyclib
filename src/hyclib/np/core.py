@@ -288,6 +288,17 @@ def repeat(arr, repeats, chunks=None, validate=True):
         if chunks.sum() != len(arr):
             raise ValueError(f"sum of chunks must be the length of arr, but {chunks.sum()=} and {len(arr)=}.")
 
+    # deal with zero repeats
+    iszero = repeats == 0
+    if iszero.any():
+        head_indices = np.concatenate([[0], chunks]).cumsum()[:-1]
+        zero_chunks = chunks[iszero]
+        index = np.arange(len(arr) - zero_chunks.sum())
+        offsets = np.zeros_like(index)
+        offsets[head_indices[iszero]] -= zero_chunks
+        index -= offsets.cumsum()
+        return repeat(arr[index], repeats[~iszero], chunks[~iszero], validate=False)
+
     regions = chunks * repeats
     index = np.arange(regions.sum())
 

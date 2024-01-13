@@ -259,12 +259,29 @@ def test_meshndim():
 
 @pytest.mark.parametrize('dtype', [np.int64, np.float32])
 def test_repeat(dtype):
-    tensor = np.array([0, 5, 2, 10, 11, 20, 21, 22, 23], dtype=dtype)
+    arr = np.array([0, 5, 2, 10, 11, 20, 21, 22, 23], dtype=dtype)
 
     chunks = np.array([3, 2, 4])
     repeats = np.array([1, 3, 2])
     
-    out = lib.np.repeat(tensor, repeats, chunks=chunks)
+    out = lib.np.repeat(arr, repeats, chunks=chunks)
     expected = np.array([0, 5, 2, 10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23], dtype=dtype)
+
+    np.testing.assert_allclose(out, expected)
+
+@pytest.mark.parametrize('dtype', [np.int64, np.float32])
+@pytest.mark.parametrize('repeats, expected', [
+    ([3, 0, 2], [0, 5, 2, 0, 5, 2, 0, 5, 2, 20, 21, 22, 23, 20, 21, 22, 23]),
+    ([0, 3, 2], [10, 11, 10, 11, 10, 11, 20, 21, 22, 23, 20, 21, 22, 23]),
+])
+def test_repeat_zero_repeat(repeats, expected, dtype):
+    """Fix bug in edge case where there are zeros in repeats."""
+    arr = np.array([0, 5, 2, 10, 11, 20, 21, 22, 23], dtype=dtype)
+
+    chunks = np.array([3, 2, 4])
+    repeats = np.array(repeats)
+    
+    out = lib.np.repeat(arr, repeats, chunks=chunks)
+    expected = np.array(expected, dtype=dtype)
 
     np.testing.assert_allclose(out, expected)

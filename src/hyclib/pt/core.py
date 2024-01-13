@@ -331,16 +331,29 @@ def repeat_interleave(tensor, repeats, chunks=None, validate=True):
         if chunks.sum() != len(tensor):
             raise ValueError(f"sum of chunks must be the length of tensor, but {chunks.sum()=} and {len(tensor)=}.")
 
-    regions = chunks * repeats
-    index = torch.arange(regions.sum().item(), device=tensor.device)
+    # deal with zero repeats
+    iszero = repeats == 0
+    if iszero.any():
+        head_indices = chunks.cumsum(dim=0).roll(1)
+        head_indices[0] = 0
+        zero_chunks = chunks[iszero]
+        index = torch.arange(len(tensor) - zero_chunks.sum().item(), device=tensor.device)
+        offsets = torch.zeros_like(index)
+        offsets[head_indices[iszero]] -= zero_chunks
+        index -= offsets.cumsum(dim=0)
+        return repeat_interleave(tensor[index], repeats[~iszero], chunks[~iszero], validate=False)
 
-    segments = chunks.repeat_interleave(repeats)
-    resets = segments[:-1].cumsum(dim=0)
-    offsets = torch.zeros_like(index)
-    offsets[resets] = segments[:-1]
-    offsets[regions[:-1].cumsum(dim=0)] -= chunks[:-1]
+    regions = chunks * repeats  # [3, 6, 8]
+    index = torch.arange(regions.sum().item(), device=tensor.device)  # [0, 1, ..., 16]
+    segments = chunks.repeat_interleave(repeats)  # [3, 2, 2, 2, 4, 4]
+    resets = segments[:-1].cumsum(dim=0)  # [3, 5, 7, 9, 13]
+    offsets = torch.zeros_like(index)  # [0, ..., 0]
+    offsets[resets] = segments[:-1]  # [0, 0, 0, 3, 0, 2, 0, 2, 0, 2, 0, 0, 0, 4, 0, 0, 0]
+    offsets[regions[:-1].cumsum(dim=0)] -= chunks[:-1]  # [0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 4, 0, 0, 0]
+    print(offsets)
+    print(offsets.cumsum(dim=0))
 
-    index -= offsets.cumsum(dim=0)
+    index -= offsets.cumsum(dim=0)  # [0, 1, 2, 3, 4, 3, 4, 3, 4, 5, 6, 7, 8, 5, 6, 7, 8]
 
     out = tensor[index]
     
