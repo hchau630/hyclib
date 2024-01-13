@@ -260,7 +260,7 @@ def intersect_rows(larr, rarr, return_indices=False, **kwargs):
         return out[0]
     return out
     
-def repeat(arr, repeats, chunks=None):
+def repeat(arr, repeats, chunks=None, validate=True):
     """
     Generalized np.repeat
     Copied from @MadPhysicist's solution: https://stackoverflow.com/questions/63510977/repeat-but-in-variable-sized-chunks-in-numpy
@@ -279,13 +279,14 @@ def repeat(arr, repeats, chunks=None):
         return np.repeat(arr, repeats)
     
     arr, repeats, chunks = np.asanyarray(arr), np.asanyarray(repeats), np.asanyarray(chunks)
-    
-    if arr.ndim != 1 or repeats.ndim != 1 or chunks.ndim != 1:
-        raise ValueError(f"arr, repeats, and chunks must all be 1D, but {arr.ndim=}, {repeats.ndim=} and {chunks.ndim=}.")
-    if len(repeats) != len(chunks):
-        raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
-    if chunks.sum() != len(arr):
-        raise ValueError(f"sum of chunks must be the length of arr, but {chunks.sum()=} and {len(arr)=}.")
+
+    if validate:
+        if arr.ndim != 1 or repeats.ndim != 1 or chunks.ndim != 1:
+            raise ValueError(f"arr, repeats, and chunks must all be 1D, but {arr.ndim=}, {repeats.ndim=} and {chunks.ndim=}.")
+        if len(repeats) != len(chunks):
+            raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
+        if chunks.sum() != len(arr):
+            raise ValueError(f"sum of chunks must be the length of arr, but {chunks.sum()=} and {len(arr)=}.")
 
     regions = chunks * repeats
     index = np.arange(regions.sum())

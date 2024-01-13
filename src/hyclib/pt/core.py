@@ -305,7 +305,7 @@ def use_deterministic_algorithms():
         torch.use_deterministic_algorithms(is_deterministic)
 
 
-def repeat_interleave(tensor, repeats, chunks=None):
+def repeat_interleave(tensor, repeats, chunks=None, validate=True):
     """
     Generalized torch.repeat_interleave
     Copied from @MadPhysicist's solution: https://stackoverflow.com/questions/63510977/repeat-but-in-variable-sized-chunks-in-numpy
@@ -323,12 +323,13 @@ def repeat_interleave(tensor, repeats, chunks=None):
     if chunks is None:
         return tensor.repeat_interleave(repeats)
 
-    if tensor.ndim != 1 or repeats.ndim != 1 or chunks.ndim != 1:
-        raise ValueError(f"tensor, repeats, and chunks must all be 1D, but {tensor.ndim=}, {repeats.ndim=} and {chunks.ndim=}.")
-    if len(repeats) != len(chunks):
-        raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
-    if chunks.sum() != len(tensor):
-        raise ValueError(f"sum of chunks must be the length of tensor, but {chunks.sum()=} and {len(tensor)=}.")
+    if validate:
+        if tensor.ndim != 1 or repeats.ndim != 1 or chunks.ndim != 1:
+            raise ValueError(f"tensor, repeats, and chunks must all be 1D, but {tensor.ndim=}, {repeats.ndim=} and {chunks.ndim=}.")
+        if len(repeats) != len(chunks):
+            raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
+        if chunks.sum() != len(tensor):
+            raise ValueError(f"sum of chunks must be the length of tensor, but {chunks.sum()=} and {len(tensor)=}.")
 
     regions = chunks * repeats
     index = torch.arange(regions.sum().item(), device=tensor.device)
