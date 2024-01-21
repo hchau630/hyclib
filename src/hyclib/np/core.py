@@ -288,10 +288,13 @@ def repeat(arr, repeats, chunks=None, validate=True):
             raise ValueError(f"repeats and chunks must have the same length, but {len(repeats)=} and {len(chunks)=}.")
         if chunks.sum() != len(arr):
             raise ValueError(f"sum of chunks must be the length of arr, but {chunks.sum()=} and {len(arr)=}.")
-        if repeats.min() < 0:
+        if len(repeats) > 0 and repeats.min() < 0:
             raise ValueError(f"repeats must be non-negative, but {repeats.min()=}.")
-        if repeats.min() == 0:
+        if len(repeats) > 0 and repeats.min() == 0:
             raise NotImplementedError(f"Currently does not support zero repeats, but {repeats.min()=}.")
+
+    if len(repeats) == 0:
+        return np.empty((0,), dtype=arr.dtype)
 
     # # deal with zero repeats (still buggy, and this is inefficient)
     # iszero = repeats == 0

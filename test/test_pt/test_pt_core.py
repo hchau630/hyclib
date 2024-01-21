@@ -341,6 +341,20 @@ def test_repeat_interleave(dtype, device):
 
     torch.testing.assert_close(out, expected)
 
+@pytest.mark.parametrize('dtype', [torch.long, torch.float])
+@pytest.mark.parametrize('device', get_devices())
+def test_repeat_interleave_empty(dtype, device):
+    """Fix bug in edge case where everything is zero-length."""
+    tensor = torch.tensor([], dtype=dtype, device=device)
+
+    chunks = torch.tensor([], dtype=torch.long, device=device)
+    repeats = torch.tensor([], dtype=torch.long, device=device)
+    
+    out = lib.pt.repeat_interleave(tensor, repeats, chunks=chunks)
+    expected = torch.tensor([], dtype=dtype, device=device)
+
+    torch.testing.assert_close(out, expected)
+
 @pytest.mark.xfail(reason='0 repeats currently not supported')
 @pytest.mark.parametrize('dtype', [torch.long, torch.float])
 @pytest.mark.parametrize('device', get_devices())

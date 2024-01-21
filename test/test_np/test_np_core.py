@@ -239,6 +239,18 @@ def test_repeat(dtype):
 
     np.testing.assert_allclose(out, expected)
 
+@pytest.mark.parametrize('dtype', [np.int64, np.float32])
+def test_repeat_empty(dtype):
+    arr = np.array([], dtype=dtype)
+
+    chunks = np.array([], dtype=int)
+    repeats = np.array([], dtype=int)
+    
+    out = lib.np.repeat(arr, repeats, chunks=chunks)
+    expected = np.array([], dtype=dtype)
+
+    np.testing.assert_allclose(out, expected)
+
 @pytest.mark.xfail(reason='0 repeats currently not supported')
 @pytest.mark.parametrize('dtype', [np.int64, np.float32])
 @pytest.mark.parametrize('repeats, expected', [
