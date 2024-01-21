@@ -360,3 +360,32 @@ def test_repeat_interleave_zero_repeat(repeats, expected, dtype, device):
     expected = torch.tensor(expected, dtype=dtype, device=device)
 
     torch.testing.assert_close(out, expected)
+
+@pytest.mark.parametrize('multi_index, dims, expected', [
+    ([[3, 6, 6], [4, 5, 1]], (7, 6), [22, 41, 37]),
+])
+@pytest.mark.parametrize('as_tuple', [True, False])
+@pytest.mark.parametrize('device', get_devices())
+def test_ravel_multi_index(multi_index, dims, expected, as_tuple, device):
+    multi_index = torch.tensor(multi_index, device=device)
+    if as_tuple:
+        multi_index = tuple(multi_index)
+    out = lib.pt.ravel_multi_index(multi_index, dims)
+    expected = torch.tensor(expected, device=device)
+    torch.testing.assert_close(out, expected)
+
+@pytest.mark.parametrize('multi_index, dims, err', [
+    ([[3, 6, -1], [4, 5, 1]], (7, 6), ValueError),
+    ([[3, 6, 7], [4, 5, 1]], (7, 6), ValueError),
+    ([[3, 6, 6.0], [4, 5, 1]], (7, 6), TypeError),
+    ([[3, 6, 6], [4, 5, 1]], (7, 6.0), TypeError),
+    ([[4, 5, 1]], (7, 6), ValueError),
+    ([[3, 6, 6], [4, 5, 1]], {7, 6}, TypeError),
+])
+@pytest.mark.parametrize('as_tuple', [True, False])
+def test_ravel_multi_index_error(multi_index, dims, as_tuple, err):
+    multi_index = torch.tensor(multi_index)
+    if as_tuple:
+        multi_index = tuple(multi_index)
+    with pytest.raises(err):
+        lib.pt.ravel_multi_index(multi_index, dims)

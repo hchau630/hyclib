@@ -2,12 +2,13 @@ import collections
 import contextlib
 import itertools
 import warnings
+import operator
 
 import torch
 
 from hyclib.np.core import meshshape
 
-__all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid', 'use_deterministic_algorithms', 'repeat_interleave']
+__all__ = ['isconst', 'inv_perm', 'lexsort', 'unique', 'meshgrid', 'use_deterministic_algorithms', 'repeat_interleave', 'ravel_multi_index']
 
 def isconst(x, dim=None, **kwargs):
     x = torch.as_tensor(x)
@@ -361,33 +362,46 @@ def repeat_interleave(tensor, repeats, chunks=None, validate=True):
     return out
 
 
+def ravel_multi_index(multi_index, dims, validate=True):
+    """
+    Similar to np.ravel_multi_index
+    Args:
+        multi_index: tuple/list of torch.Tensor or torch.Tensor such that len(multi_index) == len(dims)
+        dims: tuple/list of ints
+    Returns:
+        torch.Tensor
+    """
+    if validate:
+        if not ((isinstance(multi_index, (tuple, list)) and all(isinstance(idx, torch.Tensor) for idx in multi_index)) or isinstance(multi_index, torch.Tensor)):
+            raise TypeError(f"multi_index must be a tuple/list of torch.Tensors or a torch.Tensor, but {type(multi_index)=}.")
+
+        if not isinstance(dims, (tuple, list)):
+            raise TypeError(f"dims must be a tuple or list, but {type(dims)=}.")
+        
+        if len(multi_index) != len(dims):
+            raise ValueError(f"multi_index and dims must have same length, but {len(multi_index)=} and {len(dims)=}.")
+        
+        if any(torch.is_floating_point(idx) for idx in multi_index):
+            raise TypeError(f"multi_index must have integer dtype, but {[idx.dtype for idx in multi_index]=}.")
+
+        if not all(isinstance(dim, int) for dim in dims):
+            raise TypeError(f"dims must be a sequence of ints, but {dims=}.")
+            
+        if any(idx.min() < 0 for idx in multi_index):
+            raise ValueError(f"multi_index must be non-negative, but {[idx.min() for idx in multi_index]=}.")
+            
+        if any(idx.max() >= dim for idx, dim in zip(multi_index, dims)):
+            raise ValueError(f"multi_index must be less than dims along each dimension, but {[idx.max() for idx in multi_index]=} and {dims=}.")
+        
+    multipliers = itertools.accumulate(reversed(dims), operator.mul, initial=1)
+    return sum(index * multiplier for index, multiplier in zip(reversed(multi_index), multipliers))
+
+
 ##########################################
 ### Implemented but untested functions ###
 ##########################################
 
 # import numpy as np
-
-# def ravel_multi_index(multi_index, dims):
-#     """
-#     Similar to np.ravel_multi_index
-#     """
-#     multi_index = torch.stack(multi_index) if not isinstance(multi_index, torch.Tensor) else multi_index
-#     dims = torch.as_tensor(dims, device=multi_index.device)
-    
-#     if len(multi_index) != len(dims):
-#         raise ValueError(f"multi_index and dims must have same length, but {len(multi_index)=} and {len(dims)=}.")
-    
-#     if torch.is_floating_point(multi_index):
-#         raise TypeError(f"multi_index must be integer dtype, but {multi_index.dtype=}.")
-        
-#     if (multi_index.min(dim=1).values < 0).any():
-#         raise ValueError(f"multi_index must be non-negative, but {multi_index.min(dim=1).values=}.")
-        
-#     if (multi_index.max(dim=1).values >= dims).any():
-#         raise ValueError(f"multi_index must be less than dims along each dimension, but {multi_index.max(dim=1).values=} and {dims=}.")
-        
-#     multipliers = np.cumprod((dims[1:].tolist() + [1])[::-1])[::-1]
-#     return torch.stack([index * multiplier for index, multiplier in zip(multi_index, multipliers)], dim=0).sum(dim=0)
 
 # def unravel_index(indices, shape, *, as_tuple=True):
 #     r"""
