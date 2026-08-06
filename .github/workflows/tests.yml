@@ -4,7 +4,6 @@
 name: Tests
 
 on:
-  workflow_dispatch:
   push:
     branches: [ "main" ]
   pull_request:
@@ -42,7 +41,7 @@ jobs:
         ruff check . --exit-zero
     - name: Test with pytest
       run: |
-        pytest --device cpu --cov=src --cov-report=json
+        pytest --cov=src --cov-report=json
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v6
       with:
