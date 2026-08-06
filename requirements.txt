@@ -1,0 +1,9 @@
+# testing requirements
+pandas
+pytest
+pytest-cov
+
+# development requirements
+ruff  # code linting and formatting
+
+-e .[ml]

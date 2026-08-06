@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=64.0"]         # editable install using setuptool available since v64.0.0
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyclib"
+version = "0.1.41"
+description = "Commonly used tools across my own personal projects."
+readme = "README.md"
+requires-python = ">=3.9" # package developed with python v3.9.16
+license = { file = "LICENSE" }
+authors = [
+    { name = "Ho Yin Chau" },
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+]
+
+[project.optional-dependencies]
+numerics = [
+    'numpy',
+    'scipy',
+]
+ml = [
+    'numpy',
+    'scipy',
+    'torch>=2.1.0', # required for several MPS bug fixes
+]
+
+[project.urls]
+repository = "https://github.com/hchau630/hyclib"
+
+[tool.ruff.lint]
+select = ["E", "W", "F"] # ensure all flake8 rules are covered
+ignore = [
+    "E731", # lambda expressions
+    "E741", # ambiguous variable names
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401", # unused imports
+    "F403", # wildcard imports
+]
