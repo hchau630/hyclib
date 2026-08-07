@@ -147,6 +147,9 @@ def test_bin_precision():
     causes the rightmost point to be classified outside of the max bin instead of in
     the max bin.
     """
+    if not torch.backends.mps.is_available():
+        pytest.skip("MPS not available")
+
     for _ in range(500):
         t = torch.normal(mean=0, std=1, size=(10,), device="mps")
         out_1 = lib.pt.stats.bin(t.cpu(), bins=3)[0]
