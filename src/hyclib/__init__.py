@@ -1,7 +1,7 @@
 import importlib
 import logging
 
-from .core import functools, itertools, pprint, random
+from .core import config, functools, itertools, pprint, random
 
 logger = logging.getLogger(__name__)
 
