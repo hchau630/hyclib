@@ -1,5 +1,5 @@
-import itertools
 import collections
+import itertools
 
 
 def isconst(iterable, retval=False):
@@ -21,7 +21,7 @@ def isempty(iterable):
         return False
 
 
-def flatten_seq(s, depth=-1, dtypes=[list, tuple]):
+def flatten_seq(s, depth=-1, dtypes=(list, tuple)):
     """
     Recursively flattens a sequence (defined as an instance
     of one of the DTYPES) up to depth DEPTH.
@@ -38,13 +38,13 @@ def flatten_seq(s, depth=-1, dtypes=[list, tuple]):
     (1,2,3,4,5,6)
 
     """
-    if not any([isinstance(s, dtype) for dtype in dtypes]):
+    if not any(isinstance(s, dtype) for dtype in dtypes):
         raise TypeError(
             f"The argument to flatten_list must be one of {dtypes}, not {type(s)}."
         )
     flattened_s = []
     for elem in s:
-        if depth == 0 or not any([isinstance(elem, dtype) for dtype in dtypes]):
+        if depth == 0 or not any(isinstance(elem, dtype) for dtype in dtypes):
             flattened_s.append(elem)
         else:
             flattened_s += flatten_seq(elem, depth=depth - 1, dtypes=dtypes)
@@ -81,7 +81,7 @@ def flatten_dict(d, depth=-1):
             flattened_dict[k] = v
         else:
             for new_k, new_v in flatten_dict(v, depth=depth - 1).items():
-                flattened_dict[".".join([k, new_k])] = new_v
+                flattened_dict[f"{k}.{new_k}"] = new_v
     return flattened_dict
 
 

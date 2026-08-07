@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 from scipy import stats
 
 import hyclib as lib

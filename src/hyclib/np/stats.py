@@ -1,26 +1,26 @@
 import numpy as np
-import numpy.ma as ma
+from numpy import ma
 
 __all__ = [
-    "mean",
-    "nanmean",
-    "std",
-    "nanstd",
-    "var",
-    "nanvar",
-    "sem",
-    "nansem",
-    "count",
-    "nancount",
-    "cov",
-    "nancov",
-    "corrcoef",
-    "nancorrcoef",
-    "meanerr",
-    "nanmeanerr",
-    "weightedmeanerr",
-    "nanweightedmeanerr",
     "bincount",
+    "corrcoef",
+    "count",
+    "cov",
+    "mean",
+    "meanerr",
+    "nancorrcoef",
+    "nancount",
+    "nancov",
+    "nanmean",
+    "nanmeanerr",
+    "nansem",
+    "nanstd",
+    "nanvar",
+    "nanweightedmeanerr",
+    "sem",
+    "std",
+    "var",
+    "weightedmeanerr",
 ]
 
 mean = np.mean

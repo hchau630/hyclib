@@ -1,5 +1,5 @@
-import reprlib
 import functools
+import reprlib
 import warnings
 
 
@@ -12,7 +12,7 @@ class rpartial:
     functools.partial.
     """
 
-    __slots__ = "func", "args", "keywords", "__dict__", "__weakref__"
+    __slots__ = "__dict__", "__weakref__", "args", "func", "keywords"
 
     def __new__(cls, func, /, *args, **keywords):
         if not callable(func):

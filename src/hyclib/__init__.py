@@ -1,7 +1,7 @@
-from .core import pprint, functools, itertools, random
-
 import importlib
 import logging
+
+from .core import functools, itertools, pprint, random
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +11,6 @@ for module in modules:
     try:
         importlib.import_module(module, package="hyclib")
     except ImportError as err:
-        logger.info(f"Did not import {module=} due to ImportError {str(err)}.")
+        logger.info(f"Did not import {module=} due to ImportError {err!s}.")
 
 del importlib, modules, module, logging

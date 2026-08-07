@@ -1,14 +1,14 @@
 import numpy as np
 
 __all__ = [
-    "isconst",
-    "meshshape",
-    "meshndim",
-    "meshgrid",
-    "inv_perm",
-    "unique_rows",
     "intersect_rows",
+    "inv_perm",
+    "isconst",
+    "meshgrid",
+    "meshndim",
+    "meshshape",
     "repeat",
+    "unique_rows",
 ]
 
 

@@ -1,13 +1,13 @@
-from operator import index
 import builtins
+from operator import index
 
-import torch
 import numpy as np
+import torch
 
 __all__ = [
+    "bincount",
     "nanmax",
     "nanmin",
-    "bincount",
 ]
 
 
@@ -112,7 +112,7 @@ def _bin_edges(sample, bins=None, range=None):
     """
     Create edge arrays
     """
-    Dlen, Ndim = sample.shape  # Dlen is batch size, Ndim is number of dimensions
+    _, Ndim = sample.shape  # Ndim is number of dimensions
     device = sample.device
 
     edges = Ndim * [None]  # Bin edges for each dim (will be 2D array)
@@ -164,7 +164,7 @@ def _bin_edges(sample, bins=None, range=None):
 
 def _bin_numbers(sample, edges, dedges):
     """Compute the bin number each sample falls into, in each dimension"""
-    Dlen, Ndim = sample.shape
+    _, Ndim = sample.shape
 
     sampBin = [
         torch.bucketize(
@@ -226,19 +226,18 @@ def bin_dd(sample, bins=10, range=None, nan_policy="raise"):
     # If bins was an integer-like object, now it is an actual Python int.
 
     # `Ndim` is the number of dimensions (e.g. `2` for `binned_statistic_2d`)
-    # `Dlen` is the length of elements along each dimension.
     # This code is based on np.histogramdd
     try:
         # `sample` is an ND-array.
-        Dlen, Ndim = sample.shape
+        _, Ndim = sample.shape
     except (AttributeError, ValueError):
         # `sample` is a sequence of 1D arrays.
         sample = torch.stack(sample).t()
-        Dlen, Ndim = sample.shape
+        _, Ndim = sample.shape
 
     # NOTE: for _bin_edges(), see e.g. gh-11365
     if nan_policy == "raise" and not torch.isfinite(sample).all():
-        raise ValueError("%r contains non-finite values." % (sample,))
+        raise ValueError(f"{sample!r} contains non-finite values.")
 
     try:
         M = len(bins)
@@ -272,9 +271,8 @@ def bin(sample, bins=10, range=None, **kwargs):
     if N != 1:
         bins = [torch.as_tensor(bins, dtype=torch.float)]
 
-    if range is not None:
-        if len(range) == 2:
-            range = [range]
+    if range is not None and len(range) == 2:
+        range = [range]
 
     binnumbers, centers, edges = bin_dd([sample], bins=bins, range=range, **kwargs)
     return binnumbers[0], centers[0], edges[0]

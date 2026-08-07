@@ -34,10 +34,11 @@ ml = [
 repository = "https://github.com/hchau630/hyclib"
 
 [tool.ruff.lint]
-select = ["E", "W", "F"] # ensure all flake8 rules are covered
+extend-select = ["E", "W", "F"] # ensure all flake8 rules are covered
 ignore = [
-    "E731", # lambda expressions
-    "E741", # ambiguous variable names
+    "E731",   # lambda expressions
+    "E741",   # ambiguous variable names
+    "BLE001", # blind exception
 ]
 
 [tool.ruff.lint.per-file-ignores]

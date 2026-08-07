@@ -1,9 +1,9 @@
-from contextlib import nullcontext
 import numbers
+from contextlib import nullcontext
 
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
 from scipy import stats
 
 import hyclib as lib

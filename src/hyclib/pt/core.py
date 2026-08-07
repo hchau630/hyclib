@@ -7,14 +7,14 @@ import torch
 from hyclib.np.core import meshshape
 
 __all__ = [
-    "isconst",
     "inv_perm",
+    "isconst",
     "lexsort",
-    "unique",
     "meshgrid",
-    "use_deterministic_algorithms",
-    "repeat_interleave",
     "ravel_multi_index",
+    "repeat_interleave",
+    "unique",
+    "use_deterministic_algorithms",
 ]
 
 

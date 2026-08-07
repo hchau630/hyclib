@@ -1,5 +1,5 @@
-import random
 import contextlib
+import random
 
 
 @contextlib.contextmanager

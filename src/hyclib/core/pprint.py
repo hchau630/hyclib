@@ -1,7 +1,7 @@
 def pformat(d, indent=0, spaces=4, depth=-1, formatters=None, verbose=True):
     output = ""
     for key, value in d.items():
-        output += f"{' ' * spaces * indent}'{str(key)}':\n"
+        output += f"{' ' * spaces * indent}'{key!s}':\n"
         if depth != 0 and isinstance(value, dict):
             output += pformat(
                 value,
@@ -43,7 +43,7 @@ def iter_str(l):
         return str(l)
 
     if isinstance(l, dict):
-        s = ", ".join(f"{repr(k)}: {v}" for k, v in l.items())
+        s = ", ".join(f"{k!r}: {v}" for k, v in l.items())
         return "{" + s + "}"
 
     s = ", ".join(iter_str(v) for v in l)
