@@ -7,7 +7,7 @@ name = "hyclib"
 version = "0.1.41"
 description = "Commonly used tools across my own personal projects."
 readme = "README.md"
-requires-python = ">=3.9" # package developed with python v3.9.16
+requires-python = ">=3.9"
 license = { file = "LICENSE" }
 authors = [
     { name = "Ho Yin Chau" },
